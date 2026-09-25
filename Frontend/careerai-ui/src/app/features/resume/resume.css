@@ -1,0 +1,924 @@
+ .page-layout {
+  min-height: 100vh;
+}
+
+.page-main {
+  margin-left: 250px;
+}
+
+@media (max-width: 900px) {
+  .page-main {
+    margin-left: 0;
+  }
+}
+/* =========================================================
+   RESUME PAGE
+   ========================================================= */
+
+.resume-page {
+  min-height: calc(100vh - 80px);
+  padding: 32px;
+  background: #f4f5f7;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+  max-width: 1100px;
+  margin: 0 auto 28px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.page-header p {
+  margin-top: 8px;
+  margin-bottom: 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+
+.resume-container {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns: 380px 1fr;
+
+  gap: 24px;
+
+  align-items: start;
+}
+
+
+/* =========================================================
+   COMMON CARDS
+   ========================================================= */
+
+.upload-card,
+.resume-card {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 14px;
+
+  padding: 28px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   UPLOAD CARD
+   ========================================================= */
+
+.upload-card {
+  text-align: center;
+}
+
+.upload-icon {
+  width: 70px;
+  height: 70px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+
+  background: #fff7ed;
+
+  font-size: 32px;
+}
+
+.upload-card h2 {
+  margin: 0;
+
+  font-size: 21px;
+
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+.upload-card p {
+  margin-top: 10px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   CHOOSE PDF
+   ========================================================= */
+
+.upload-button {
+  display: inline-block;
+
+  margin-top: 18px;
+
+  padding: 12px 22px;
+
+  border-radius: 8px;
+
+  background: #f97316;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.upload-button:hover {
+  background: #ea580c;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   SELECTED LOCAL FILE
+   ========================================================= */
+
+.selected-file {
+  margin-top: 18px;
+
+  padding: 12px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  background: #f9fafb;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+
+  text-align: left;
+}
+
+.selected-file strong {
+  color: #374151;
+
+  word-break: break-word;
+}
+
+.selected-file span {
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   UPLOAD BUTTON
+   ========================================================= */
+
+.upload-submit {
+  width: 100%;
+
+  margin-top: 14px;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #1f2937;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.upload-submit:hover {
+  background: #111827;
+}
+
+.upload-submit:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   SUCCESS / ERROR
+   ========================================================= */
+
+.success-message {
+  margin-top: 15px;
+
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  background: #dcfce7;
+
+  color: #166534;
+
+  font-size: 13px;
+}
+
+.error-message {
+  margin-top: 15px;
+
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  background: #fee2e2;
+
+  color: #b91c1c;
+
+  font-size: 13px;
+}
+
+.file-info {
+  display: block;
+
+  margin-top: 12px;
+
+  font-size: 12px;
+
+  color: #9ca3af;
+}
+
+
+/* =========================================================
+   RESUME CARD
+   ========================================================= */
+
+.resume-card h2 {
+  margin: 0;
+
+  font-size: 21px;
+
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+.resume-card p {
+  color: #6b7280;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+.card-header {
+  padding-bottom: 20px;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header p {
+  margin-bottom: 0;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+  padding: 60px 20px;
+
+  text-align: center;
+}
+
+.empty-icon {
+  margin-bottom: 15px;
+
+  font-size: 42px;
+}
+
+.empty-state h3 {
+  margin: 0;
+
+  font-size: 18px;
+
+  font-weight: 600;
+
+  color: #374151;
+}
+
+.empty-state p {
+  max-width: 420px;
+
+  margin: 10px auto;
+
+  color: #6b7280;
+}
+
+
+/* =========================================================
+   RESUME ITEM
+   ========================================================= */
+
+.resume-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 16px;
+
+  margin-top: 20px;
+
+  background: #f9fafb;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.resume-item:hover {
+  background: #fff7ed;
+
+  border-color: #fed7aa;
+}
+
+.resume-item.selected {
+  background: #fff7ed;
+
+  border-color: #f97316;
+
+  box-shadow: 0 0 0 1px #f97316;
+}
+
+
+/* =========================================================
+   RESUME ICON
+   ========================================================= */
+
+.resume-item-icon {
+  width: 44px;
+  height: 44px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #fff7ed;
+
+  font-size: 22px;
+}
+
+
+/* =========================================================
+   RESUME INFO
+   ========================================================= */
+
+.resume-item-info {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  min-width: 0;
+}
+
+.resume-item-info strong {
+  color: #374151;
+
+  font-size: 14px;
+
+  word-break: break-word;
+}
+
+.resume-item-info span {
+  color: #9ca3af;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   SELECTED RESUME PANEL
+   ========================================================= */
+
+.selected-resume-panel {
+  margin-top: 20px;
+
+  padding: 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  background: #fff7ed;
+
+  border: 1px solid #fed7aa;
+
+  border-radius: 10px;
+}
+
+.selected-resume-info {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  min-width: 0;
+}
+
+.selected-label {
+  color: #9a3412;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+.selected-resume-info strong {
+  color: #374151;
+
+  font-size: 14px;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   ANALYZE BUTTON
+   ========================================================= */
+
+.analyze-button {
+  flex-shrink: 0;
+
+  padding: 11px 18px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #f97316;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.analyze-button:hover {
+  background: #ea580c;
+
+  transform: translateY(-1px);
+}
+
+.analyze-button:disabled {
+  opacity: 0.7;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   ANALYSIS SUCCESS
+   ========================================================= */
+
+.analysis-success {
+  margin-top: 18px;
+
+  padding: 12px 14px;
+
+  border-radius: 8px;
+
+  background: #dcfce7;
+
+  border: 1px solid #bbf7d0;
+
+  color: #166534;
+
+  font-size: 13px;
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   ANALYSIS ERROR
+   ========================================================= */
+
+.analysis-error {
+  margin-top: 18px;
+
+  padding: 12px 14px;
+
+  border-radius: 8px;
+
+  background: #fee2e2;
+
+  border: 1px solid #fecaca;
+
+  color: #b91c1c;
+
+  font-size: 13px;
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   AI ANALYSIS CARD
+   ========================================================= */
+
+.analysis-card {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 24px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================================
+   ANALYSIS HEADER
+   ========================================================= */
+
+.analysis-header {
+  padding: 22px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  background:
+    linear-gradient(
+      to right,
+      #fff7ed,
+      #ffffff
+    );
+
+  border-bottom: 1px solid #fed7aa;
+}
+
+.analysis-title {
+  min-width: 0;
+}
+
+.analysis-badge {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #ea580c;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+.analysis-header h2 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 21px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   SCORE
+   ========================================================= */
+
+.score-box {
+  min-width: 110px;
+
+  padding: 12px 16px;
+
+  text-align: center;
+
+  background: #1f2937;
+
+  border-radius: 10px;
+
+  color: #ffffff;
+}
+
+.score-box span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  color: #d1d5db;
+}
+
+.score-box strong {
+  display: block;
+
+  font-size: 25px;
+
+  font-weight: 800;
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   ANALYSIS SECTION
+   ========================================================= */
+
+.analysis-section {
+  padding: 20px 22px;
+
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.analysis-section:last-child {
+  border-bottom: none;
+}
+
+.analysis-section h3 {
+  margin: 0 0 10px;
+
+  color: #1f2937;
+
+  font-size: 16px;
+
+  font-weight: 700;
+}
+
+.analysis-section p {
+  margin: 0;
+
+  color: #4b5563;
+
+  font-size: 14px;
+
+  line-height: 1.7;
+
+  white-space: pre-line;
+}
+
+
+/* =========================================================
+   SKILLS
+   ========================================================= */
+
+.skills-container {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+.skill-tag {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 7px 11px;
+
+  border-radius: 20px;
+
+  background: #fff7ed;
+
+  border: 1px solid #fed7aa;
+
+  color: #9a3412;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   SUGGESTIONS
+   ========================================================= */
+
+.suggestions-section {
+  background: #fffbeb;
+}
+
+.suggestions-section h3 {
+  color: #92400e;
+}
+
+.suggestions-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.suggestion-item {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 12px;
+
+  padding: 12px;
+
+  background: #ffffff;
+
+  border: 1px solid #fde68a;
+
+  border-radius: 8px;
+}
+
+.suggestion-number {
+  width: 26px;
+  height: 26px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #f97316;
+
+  color: #ffffff;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+.suggestion-item p {
+  margin: 0;
+
+  color: #4b5563;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   ANALYSIS FOOTER
+   ========================================================= */
+
+.analysis-footer {
+  padding: 14px 22px;
+
+  background: #f9fafb;
+
+  border-top: 1px solid #e5e7eb;
+
+  color: #9ca3af;
+
+  font-size: 12px;
+
+  text-align: right;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  .resume-container {
+    grid-template-columns: 1fr;
+  }
+
+  .resume-page {
+    padding: 22px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .resume-page {
+    padding: 16px;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .upload-card,
+  .resume-card {
+    padding: 20px;
+  }
+
+  .resume-item {
+    align-items: flex-start;
+  }
+
+  .selected-resume-panel {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .analyze-button {
+    width: 100%;
+  }
+
+  .analysis-header {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .score-box {
+    width: 100%;
+
+    box-sizing: border-box;
+  }
+
+}

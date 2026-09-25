@@ -1,0 +1,116 @@
+
+<header class="navbar">
+  <div class="navbar-left">
+    <h1>
+      {{ isRecruiter ? 'Recruiter Dashboard' : 'Dashboard' }}
+    </h1>
+
+    <span>
+      {{
+        isRecruiter
+          ? 'Manage jobs and candidates'
+          : 'Manage your career journey'
+      }}
+    </span>
+  </div>
+
+  <div class="navbar-right">
+
+    <!-- Notification Bell -->
+    <div class="notification-container">
+
+      <button
+        type="button"
+        class="notification-button"
+        title="Notifications"
+        (click)="toggleNotifications()"
+      >
+        🔔
+
+        <span
+          class="notification-badge"
+          *ngIf="unreadCount > 0"
+        >
+          {{ unreadCount > 99 ? '99+' : unreadCount }}
+        </span>
+      </button>
+
+      <!-- Notification Dropdown -->
+      <div
+        class="notification-dropdown"
+        *ngIf="showNotifications"
+      >
+
+        <div class="notification-header">
+          <h3>Notifications</h3>
+
+          <span *ngIf="unreadCount > 0">
+            {{ unreadCount }} unread
+          </span>
+        </div>
+
+        <div
+          class="notification-loading"
+          *ngIf="loadingNotifications"
+        >
+          Loading notifications...
+        </div>
+
+        <div
+          class="notification-empty"
+          *ngIf="!loadingNotifications && notifications.length === 0"
+        >
+          <span>🔔</span>
+          <p>No notifications yet</p>
+        </div>
+
+        <div
+          class="notification-list"
+          *ngIf="!loadingNotifications && notifications.length > 0"
+        >
+
+          <div
+            class="notification-item"
+            *ngFor="let notification of notifications"
+            [class.unread]="!notification.isRead"
+            (click)="markAsRead(notification)"
+          >
+
+            <div class="notification-content">
+              <strong>{{ notification.title }}</strong>
+
+              <p>{{ notification.message }}</p>
+
+              <small>
+                {{ notification.createdAt | date:'medium' }}
+              </small>
+            </div>
+
+            <span
+              class="unread-indicator"
+              *ngIf="!notification.isRead"
+            ></span>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- User Profile -->
+    <div class="user-profile">
+
+      <div class="user-avatar">
+        {{ isRecruiter ? 'R' : 'C' }}
+      </div>
+
+      <div class="user-info">
+        <strong>{{ userRoleName }}</strong>
+        <span>{{ userRoleDescription }}</span>
+      </div>
+
+    </div>
+
+  </div>
+</header>

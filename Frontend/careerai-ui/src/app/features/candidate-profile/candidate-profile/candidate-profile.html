@@ -1,0 +1,327 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="profile-page">
+
+  <!-- =========================
+       PAGE HEADER
+  ========================== -->
+
+  <div class="page-header">
+
+    <div>
+      <span class="eyebrow">
+        CAREERAI
+      </span>
+
+      <h1>
+        My Profile
+      </h1>
+
+      <p>
+        Manage your personal and professional information.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="refreshProfile()"
+      [disabled]="isLoading">
+
+      ↻ Refresh
+
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       SUCCESS MESSAGE
+  ========================== -->
+
+  <div
+    class="message success-message"
+    *ngIf="successMessage">
+
+    ✓ {{ successMessage }}
+
+  </div>
+
+
+  <!-- =========================
+       ERROR MESSAGE
+  ========================== -->
+
+  <div
+    class="message error-message"
+    *ngIf="errorMessage">
+
+    ⚠ {{ errorMessage }}
+
+  </div>
+
+
+  <!-- =========================
+       LOADING
+  ========================== -->
+
+  <div
+    class="loading-state"
+    *ngIf="isLoading && !profile">
+
+    <div class="spinner"></div>
+
+    <p>
+      Loading your profile...
+    </p>
+
+  </div>
+
+
+  <!-- =========================
+       PROFILE CONTENT
+  ========================== -->
+
+  <div
+    class="profile-content"
+    *ngIf="profile">
+
+
+    <!-- =========================
+         PROFILE SUMMARY
+    ========================== -->
+
+    <section class="profile-summary">
+
+      <div class="avatar">
+
+        {{ firstName.charAt(0) }}{{ lastName.charAt(0) }}
+
+      </div>
+
+
+      <div class="summary-content">
+
+        <h2>
+          {{ firstName }} {{ lastName }}
+        </h2>
+
+        <p class="email">
+          ✉ {{ email }}
+        </p>
+
+        <p
+          class="location"
+          *ngIf="location">
+
+          📍 {{ location }}
+
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         PERSONAL INFORMATION
+    ========================== -->
+
+    <section class="profile-card">
+
+      <div class="section-heading">
+
+        <div class="section-icon">
+          👤
+        </div>
+
+        <div>
+
+          <h2>
+            Personal Information
+          </h2>
+
+          <p>
+            Update your personal details and contact information.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+
+        <!-- First Name -->
+
+        <div class="form-group">
+
+          <label for="firstName">
+            First Name
+          </label>
+
+          <input
+            id="firstName"
+            type="text"
+            [(ngModel)]="firstName"
+            placeholder="Enter your first name"
+            autocomplete="given-name">
+
+        </div>
+
+
+        <!-- Last Name -->
+
+        <div class="form-group">
+
+          <label for="lastName">
+            Last Name
+          </label>
+
+          <input
+            id="lastName"
+            type="text"
+            [(ngModel)]="lastName"
+            placeholder="Enter your last name"
+            autocomplete="family-name">
+
+        </div>
+
+
+        <!-- Email -->
+
+        <div class="form-group">
+
+          <label for="email">
+            Email Address
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            [(ngModel)]="email"
+            readonly>
+
+          <span class="field-hint">
+            Email address cannot be changed here.
+          </span>
+
+        </div>
+
+
+        <!-- Phone -->
+
+        <div class="form-group">
+
+          <label for="phoneNumber">
+            Phone Number
+          </label>
+
+          <input
+            id="phoneNumber"
+            type="text"
+            [(ngModel)]="phoneNumber"
+            placeholder="Enter your phone number"
+            autocomplete="tel">
+
+        </div>
+
+
+        <!-- Location -->
+
+        <div class="form-group">
+
+          <label for="location">
+            Location
+          </label>
+
+          <input
+            id="location"
+            type="text"
+            [(ngModel)]="location"
+            placeholder="e.g. Pune"
+            autocomplete="address-level2">
+
+        </div>
+
+
+        <!-- Date of Birth -->
+
+        <div class="form-group">
+
+          <label for="dateOfBirth">
+            Date of Birth
+          </label>
+
+          <input
+            id="dateOfBirth"
+            type="date"
+            [(ngModel)]="dateOfBirth">
+
+        </div>
+
+
+        <!-- Bio -->
+
+        <div class="form-group full-width">
+
+          <label for="bio">
+            Professional Bio
+          </label>
+
+          <textarea
+            id="bio"
+            [(ngModel)]="bio"
+            placeholder="Tell recruiters about yourself, your skills, experience and career goals..."
+            rows="6">
+          </textarea>
+
+          <span class="character-count">
+            {{ bio.length }} characters
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- =========================
+           SAVE BUTTON
+      ========================== -->
+
+      <div class="save-section">
+
+        <button
+          type="button"
+          class="save-btn"
+          (click)="saveProfile()"
+          [disabled]="isSaving || isLoading">
+
+          <span *ngIf="!isSaving">
+            ✓ Save Changes
+          </span>
+
+          <span *ngIf="isSaving">
+            Saving...
+          </span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>
+
+  </main>
+
+</div>

@@ -1,0 +1,556 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="resume-page">
+
+  <!-- ===================================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <h1>
+      My Resume
+    </h1>
+
+    <p>
+      Upload your resume and analyze it with AI.
+    </p>
+
+  </div>
+
+
+  <div class="resume-container">
+
+
+    <!-- =================================================== -->
+    <!-- UPLOAD CARD -->
+    <!-- =================================================== -->
+
+    <div class="upload-card">
+
+      <div class="upload-icon">
+        📄
+      </div>
+
+
+      <h2>
+        Upload Resume
+      </h2>
+
+
+      <p>
+        Upload your resume in PDF format to get started.
+      </p>
+
+
+      <!-- Choose PDF -->
+
+      <label class="upload-button">
+
+        Choose PDF
+
+        <input
+          type="file"
+          accept=".pdf"
+          hidden
+          (change)="onFileSelected($event)"
+        />
+
+      </label>
+
+
+      <!-- Selected local file -->
+
+      @if (selectedFile) {
+
+        <div class="selected-file">
+
+          <strong>
+            {{ selectedFile.name }}
+          </strong>
+
+          <span>
+            {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB
+          </span>
+
+        </div>
+
+
+        <!-- Upload -->
+
+        <button
+          type="button"
+          class="upload-submit"
+          [disabled]="isUploading"
+          (click)="uploadResume()"
+        >
+
+          @if (isUploading) {
+
+            Uploading...
+
+          } @else {
+
+            Upload Resume
+
+          }
+
+        </button>
+
+      }
+
+
+      <!-- Upload success -->
+
+      @if (uploadMessage) {
+
+        <div class="success-message">
+
+          {{ uploadMessage }}
+
+        </div>
+
+      }
+
+
+      <!-- Upload error -->
+
+      @if (errorMessage) {
+
+        <div class="error-message">
+
+          {{ errorMessage }}
+
+        </div>
+
+      }
+
+
+      <span class="file-info">
+
+        Maximum file size: 5 MB
+
+      </span>
+
+    </div>
+
+
+
+    <!-- =================================================== -->
+    <!-- RESUME CARD -->
+    <!-- =================================================== -->
+
+    <div class="resume-card">
+
+
+      <!-- Header -->
+
+      <div class="card-header">
+
+        <h2>
+          Your Resume
+        </h2>
+
+        <p>
+          Your latest uploaded resume.
+        </p>
+
+      </div>
+
+
+
+      <!-- ================================================= -->
+      <!-- NO RESUME -->
+      <!-- ================================================= -->
+
+      @if (resumes.length === 0) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            📁
+          </div>
+
+          <h3>
+            No resume yet
+          </h3>
+
+          <p>
+            Upload your resume to start using
+            CareerAI's AI-powered analysis.
+          </p>
+
+        </div>
+
+      }
+
+      @else {
+
+
+        <!-- ================================================= -->
+        <!-- RESUME LIST -->
+        <!-- ================================================= -->
+
+        @for (
+          resume of resumes;
+          track resume.id
+        ) {
+
+          <div
+            class="resume-item selected"
+            (click)="selectResume(resume)"
+          >
+
+            <div class="resume-item-icon">
+              📄
+            </div>
+
+
+            <div class="resume-item-info">
+
+              <strong>
+                {{ resume.fileName }}
+              </strong>
+
+              <span>
+
+                Uploaded:
+                {{ resume.uploadedAt | date:'medium' }}
+
+              </span>
+
+            </div>
+
+          </div>
+
+        }
+
+
+
+        <!-- ================================================= -->
+        <!-- SELECTED RESUME -->
+        <!-- ================================================= -->
+
+        @if (selectedResume) {
+
+          <div class="selected-resume-panel">
+
+
+            <div class="selected-resume-info">
+
+              <span class="selected-label">
+                SELECTED RESUME
+              </span>
+
+              <strong>
+                {{ selectedResume.fileName }}
+              </strong>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- ANALYZE BUTTON -->
+            <!-- ================================================= -->
+
+            <button
+              type="button"
+              class="analyze-button"
+              [disabled]="isAnalyzing"
+              (click)="analyzeResume()"
+            >
+
+              @if (isAnalyzing) {
+
+                🤖 Analyzing...
+
+              }
+
+              @else {
+
+                🤖 Analyze with AI
+
+              }
+
+            </button>
+
+          </div>
+
+
+
+          <!-- ================================================= -->
+          <!-- ANALYSIS SUCCESS -->
+          <!-- ================================================= -->
+
+          @if (analysisMessage) {
+
+            <div class="analysis-success">
+
+              ✅
+              {{ analysisMessage }}
+
+            </div>
+
+          }
+
+
+
+          <!-- ================================================= -->
+          <!-- ANALYSIS ERROR -->
+          <!-- ================================================= -->
+
+          @if (analysisError) {
+
+            <div class="analysis-error">
+
+              ❌
+              {{ analysisError }}
+
+            </div>
+
+          }
+
+
+
+          <!-- ================================================= -->
+          <!-- AI ANALYSIS -->
+          <!-- ================================================= -->
+
+          @if (analysis) {
+
+            <div class="analysis-card">
+
+
+              <!-- ================================================= -->
+              <!-- HEADER -->
+              <!-- ================================================= -->
+
+              <div class="analysis-header">
+
+
+                <div class="analysis-title">
+
+                  <span class="analysis-badge">
+
+                    AI POWERED
+
+                  </span>
+
+
+                  <h2>
+
+                    🤖 Resume Analysis
+
+                  </h2>
+
+                </div>
+
+
+
+                <!-- SCORE -->
+
+                <div class="score-box">
+
+                  <span>
+                    RESUME SCORE
+                  </span>
+
+                  <strong>
+                    {{ analysis.score }}/100
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+
+              <!-- ================================================= -->
+              <!-- SUMMARY -->
+              <!-- ================================================= -->
+
+              @if (analysis.summary) {
+
+                <div class="analysis-section">
+
+                  <h3>
+                    📄 Summary
+                  </h3>
+
+                  <p>
+                    {{ analysis.summary }}
+                  </p>
+
+                </div>
+
+              }
+
+
+
+              <!-- ================================================= -->
+              <!-- SKILLS -->
+              <!-- ================================================= -->
+
+              @if (analysis.skills.length > 0) {
+
+                <div class="analysis-section">
+
+                  <h3>
+                    💻 Skills
+                  </h3>
+
+
+                  <div class="skills-container">
+
+                    @for (
+                      skill of analysis.skills;
+                      track skill
+                    ) {
+
+                      <span class="skill-tag">
+
+                        {{ skill }}
+
+                      </span>
+
+                    }
+
+                  </div>
+
+                </div>
+
+              }
+
+
+
+              <!-- ================================================= -->
+              <!-- EDUCATION -->
+              <!-- ================================================= -->
+
+              @if (analysis.education) {
+
+                <div class="analysis-section">
+
+                  <h3>
+                    🎓 Education
+                  </h3>
+
+                  <p>
+                    {{ analysis.education }}
+                  </p>
+
+                </div>
+
+              }
+
+
+
+              <!-- ================================================= -->
+              <!-- EXPERIENCE -->
+              <!-- ================================================= -->
+
+              @if (analysis.experience) {
+
+                <div class="analysis-section">
+
+                  <h3>
+                    💼 Experience
+                  </h3>
+
+                  <p>
+                    {{ analysis.experience }}
+                  </p>
+
+                </div>
+
+              }
+
+
+
+              <!-- ================================================= -->
+              <!-- SUGGESTIONS -->
+              <!-- ================================================= -->
+
+              @if (analysis.suggestions.length > 0) {
+
+                <div
+                  class="analysis-section suggestions-section"
+                >
+
+                  <h3>
+                    💡 AI Suggestions
+                  </h3>
+
+
+                  <div class="suggestions-list">
+
+                    @for (
+                      suggestion of analysis.suggestions;
+                      track suggestion
+                    ) {
+
+                      <div class="suggestion-item">
+
+                        <span class="suggestion-number">
+
+                          {{ $index + 1 }}
+
+                        </span>
+
+
+                        <p>
+
+                          {{ suggestion }}
+
+                        </p>
+
+                      </div>
+
+                    }
+
+                  </div>
+
+                </div>
+
+              }
+
+
+
+              <!-- ================================================= -->
+              <!-- ANALYZED DATE -->
+              <!-- ================================================= -->
+
+              @if (analysis.analyzedAt) {
+
+                <div class="analysis-footer">
+
+                  Analyzed on
+                  {{ analysis.analyzedAt | date:'medium' }}
+
+                </div>
+
+              }
+
+            </div>
+
+          }
+
+        }
+
+      }
+
+    </div>
+
+  </div>
+
+</div>
+
+  </main>
+
+</div>

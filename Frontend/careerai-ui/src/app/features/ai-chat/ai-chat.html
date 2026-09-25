@@ -1,0 +1,585 @@
+
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+    <app-navbar></app-navbar>
+
+    <section class="chat-page" aria-labelledby="chat-title">
+
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div>
+          <span class="eyebrow">CAREERAI ASSISTANT</span>
+          <h1 id="chat-title">AI Career Chat</h1>
+          <p>Get practical guidance for your next career move.</p>
+        </div>
+
+        <button
+          type="button"
+          class="new-chat-button"
+          (click)="createConversation()"
+          [disabled]="isSending || isDeleting">
+          <span aria-hidden="true">+</span>
+          New conversation
+        </button>
+      </header>
+
+      <!-- Error Message -->
+      @if (errorMessage) {
+        <div class="chat-error" role="alert">
+          <strong>Something went wrong</strong>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <!-- Success Message -->
+      @if (successMessage) {
+        <div class="chat-success" role="status">
+          {{ successMessage }}
+        </div>
+      }
+
+      <div class="chat-workspace">
+
+        <!-- Conversation History -->
+        <aside
+          class="conversation-panel"
+          aria-label="Conversations">
+
+          <div class="panel-heading">
+            <div>
+              <span class="panel-eyebrow">YOUR HISTORY</span>
+              <h2>Conversations</h2>
+            </div>
+
+            <span class="conversation-count">
+              {{ conversations.length }}
+            </span>
+          </div>
+
+          @if (isLoading) {
+
+            <div class="panel-state">
+              Loading conversations...
+            </div>
+
+          } @else if (conversations.length === 0) {
+
+            <div class="panel-state empty-panel">
+              <span aria-hidden="true">💬</span>
+              <p>Your conversations will appear here.</p>
+            </div>
+
+          } @else {
+
+            <div class="conversation-list">
+
+              @for (
+                conversation of conversations;
+                track conversation.id
+              ) {
+
+                <div
+                  class="conversation-item-wrapper"
+                  [class.selected]="selectedConversation?.id === conversation.id">
+
+                  <!-- Select Conversation -->
+                  <button
+                    type="button"
+                    class="conversation-item"
+                    [class.selected]="selectedConversation?.id === conversation.id"
+                    (click)="selectConversation(conversation)">
+
+                    <span
+                      class="conversation-icon"
+                      aria-hidden="true">
+                      ⌁
+                    </span>
+
+                    <span class="conversation-copy">
+                      <strong>
+                        {{ conversation.title }}
+                      </strong>
+
+                      <small>
+                        {{ conversation.messages.length }} messages
+                      </small>
+                    </span>
+
+                  </button>
+
+                  <!-- Delete Conversation -->
+                  <button
+                    type="button"
+                    class="delete-conversation-button"
+                    title="Delete conversation"
+                    aria-label="Delete conversation"
+                    [disabled]="isDeleting || isSending"
+                    (click)="deleteConversation(conversation); $event.stopPropagation()">
+
+                    @if (deletingConversationId === conversation.id) {
+
+                      <span
+                        class="delete-spinner"
+                        aria-hidden="true">
+                      </span>
+
+                    } @else {
+
+                      <span aria-hidden="true">🗑</span>
+
+                    }
+
+                  </button>
+
+                </div>
+
+              }
+
+            </div>
+
+          }
+
+        </aside>
+
+        <!-- Chat Panel -->
+        <section
+          class="chat-panel"
+          aria-label="Career conversation">
+
+          @if (!selectedConversation) {
+
+            <!-- Empty Chat State -->
+            <div class="chat-empty">
+
+              <div
+                class="chat-empty-icon"
+                aria-hidden="true">
+                ✦
+              </div>
+
+              <span class="panel-eyebrow">
+                YOUR CAREER, IN FOCUS
+              </span>
+
+              <h2>Start a career conversation</h2>
+
+              <p>
+                Ask about resumes, interviews, skills,
+                learning plans, or your next job search.
+              </p>
+
+              <button
+                type="button"
+                class="start-chat-button"
+                (click)="createConversation()"
+                [disabled]="isDeleting">
+
+                Start chatting
+
+                <span aria-hidden="true">→</span>
+
+              </button>
+
+            </div>
+
+          } @else {
+
+            <!-- Selected Conversation Header -->
+            <header class="conversation-header">
+
+              <div
+                class="conversation-heading-icon"
+                aria-hidden="true">
+                ✦
+              </div>
+
+              <div>
+                <h2>
+                  {{ selectedConversation.title }}
+                </h2>
+
+                <span>
+                  CareerAI is ready to help
+                </span>
+              </div>
+
+            </header>
+
+            <!-- Messages -->
+            <div
+              class="message-list"
+              aria-live="polite">
+
+              @if (selectedConversation.messages.length === 0) {
+
+                <div class="message-empty">
+                  <span aria-hidden="true">✦</span>
+
+                  <p>
+                    Ask your first career question to begin.
+                  </p>
+                </div>
+
+              }
+
+              @for (
+                message of selectedConversation.messages;
+                track message.id
+              ) {
+
+                <article
+                  class="message-row"
+                  [class.assistant-row]="isAssistant(message)"
+                  [class.user-row]="!isAssistant(message)">
+
+                  <div
+                    class="message-avatar"
+                    aria-hidden="true">
+
+                    {{ isAssistant(message) ? '✦' : 'C' }}
+
+                  </div>
+
+                  <div class="message-bubble">
+
+                    <span class="message-role">
+                      {{ isAssistant(message) ? 'CareerAI' : 'You' }}
+                    </span>
+
+                    @if (isAssistant(message)) {
+
+                      <!-- Assistant Markdown -->
+                      <div class="assistant-markdown">
+
+                        @for (
+                          block of getMarkdownBlocks(message);
+                          track $index
+                        ) {
+
+                          @switch (block.type) {
+
+                            <!-- Heading -->
+                            @case ('heading') {
+
+                              @switch (block.level) {
+
+                                @case (1) {
+
+                                  <h1>
+                                    @for (
+                                      token of block.tokens ?? [];
+                                      track $index
+                                    ) {
+
+                                      @if (token.type === 'strong') {
+
+                                        <strong>
+                                          {{ token.value }}
+                                        </strong>
+
+                                      } @else if (token.type === 'code') {
+
+                                        <code>
+                                          {{ token.value }}
+                                        </code>
+
+                                      } @else {
+
+                                        {{ token.value }}
+
+                                      }
+
+                                    }
+                                  </h1>
+
+                                }
+
+                                @case (2) {
+
+                                  <h2>
+                                    @for (
+                                      token of block.tokens ?? [];
+                                      track $index
+                                    ) {
+
+                                      @if (token.type === 'strong') {
+
+                                        <strong>
+                                          {{ token.value }}
+                                        </strong>
+
+                                      } @else if (token.type === 'code') {
+
+                                        <code>
+                                          {{ token.value }}
+                                        </code>
+
+                                      } @else {
+
+                                        {{ token.value }}
+
+                                      }
+
+                                    }
+                                  </h2>
+
+                                }
+
+                                @default {
+
+                                  <h3>
+                                    @for (
+                                      token of block.tokens ?? [];
+                                      track $index
+                                    ) {
+
+                                      @if (token.type === 'strong') {
+
+                                        <strong>
+                                          {{ token.value }}
+                                        </strong>
+
+                                      } @else if (token.type === 'code') {
+
+                                        <code>
+                                          {{ token.value }}
+                                        </code>
+
+                                      } @else {
+
+                                        {{ token.value }}
+
+                                      }
+
+                                    }
+                                  </h3>
+
+                                }
+
+                              }
+
+                            }
+
+                            <!-- Unordered List -->
+                            @case ('unordered-list') {
+
+                              <ul>
+
+                                @for (
+                                  item of block.items ?? [];
+                                  track $index
+                                ) {
+
+                                  <li>
+
+                                    @for (
+                                      token of item;
+                                      track $index
+                                    ) {
+
+                                      @if (token.type === 'strong') {
+
+                                        <strong>
+                                          {{ token.value }}
+                                        </strong>
+
+                                      } @else if (token.type === 'code') {
+
+                                        <code>
+                                          {{ token.value }}
+                                        </code>
+
+                                      } @else {
+
+                                        {{ token.value }}
+
+                                      }
+
+                                    }
+
+                                  </li>
+
+                                }
+
+                              </ul>
+
+                            }
+
+                            <!-- Ordered List -->
+                            @case ('ordered-list') {
+
+                              <ol>
+
+                                @for (
+                                  item of block.items ?? [];
+                                  track $index
+                                ) {
+
+                                  <li>
+
+                                    @for (
+                                      token of item;
+                                      track $index
+                                    ) {
+
+                                      @if (token.type === 'strong') {
+
+                                        <strong>
+                                          {{ token.value }}
+                                        </strong>
+
+                                      } @else if (token.type === 'code') {
+
+                                        <code>
+                                          {{ token.value }}
+                                        </code>
+
+                                      } @else {
+
+                                        {{ token.value }}
+
+                                      }
+
+                                    }
+
+                                  </li>
+
+                                }
+
+                              </ol>
+
+                            }
+
+                            <!-- Code Block -->
+                            @case ('code') {
+
+                              <pre>
+                                <code>{{ block.code }}</code>
+                              </pre>
+
+                            }
+
+                            <!-- Divider -->
+                            @case ('divider') {
+
+                              <hr>
+
+                            }
+
+                            <!-- Paragraph -->
+                            @default {
+
+                              <p>
+
+                                @for (
+                                  token of block.tokens ?? [];
+                                  track $index
+                                ) {
+
+                                  @if (token.type === 'strong') {
+
+                                    <strong>
+                                      {{ token.value }}
+                                    </strong>
+
+                                  } @else if (token.type === 'code') {
+
+                                    <code>
+                                      {{ token.value }}
+                                    </code>
+
+                                  } @else {
+
+                                    {{ token.value }}
+
+                                  }
+
+                                }
+
+                              </p>
+
+                            }
+
+                          }
+
+                        }
+
+                      </div>
+
+                    } @else {
+
+                      <!-- User Message -->
+                      <p class="plain-message">
+                        {{ message.content }}
+                      </p>
+
+                    }
+
+                  </div>
+
+                </article>
+
+              }
+
+              <!-- Typing Indicator -->
+              @if (isSending) {
+
+                <div class="typing-state">
+
+                  <span></span>
+                  <span></span>
+                  <span></span>
+
+                  CareerAI is thinking...
+
+                </div>
+
+              }
+
+            </div>
+
+            <!-- Message Composer -->
+            <form
+              class="message-composer"
+              (ngSubmit)="sendMessage()">
+
+              <label
+                class="sr-only"
+                for="career-message">
+                Message CareerAI
+              </label>
+
+              <textarea
+                id="career-message"
+                name="careerMessage"
+                rows="2"
+                [(ngModel)]="draftMessage"
+                placeholder="Ask CareerAI about your next career move..."
+                [disabled]="isSending || isDeleting">
+              </textarea>
+
+              <button
+                type="submit"
+                class="send-button"
+                [disabled]="isSending || isDeleting || !draftMessage.trim()"
+                aria-label="Send message">
+
+                <span aria-hidden="true">↑</span>
+
+              </button>
+
+            </form>
+
+          }
+
+        </section>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

@@ -1,0 +1,397 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="saved-jobs-page">
+
+  <!-- ===================================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div class="header-content">
+
+      <span class="page-label">
+        CAREERAI
+      </span>
+
+      <h1>
+        Saved Jobs
+      </h1>
+
+      <p>
+        Keep track of the opportunities you want to apply for.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="browse-button"
+      (click)="browseJobs()"
+    >
+
+      Browse Jobs
+
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SUCCESS MESSAGE -->
+  <!-- ===================================================== -->
+
+  @if (successMessage) {
+
+    <div class="success-message">
+
+      <span>
+        ✓
+      </span>
+
+      {{ successMessage }}
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR MESSAGE -->
+  <!-- ===================================================== -->
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+
+      <span>
+        ⚠️
+      </span>
+
+      <div>
+
+        <strong>
+          Something went wrong
+        </strong>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- LOADING -->
+  <!-- ===================================================== -->
+
+  @if (isLoading) {
+
+    <div class="loading-state">
+
+      <div class="loading-spinner"></div>
+
+      <h3>
+        Loading saved jobs...
+      </h3>
+
+      <p>
+        Please wait while we load your saved opportunities.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- SAVED JOBS CONTENT -->
+  <!-- ===================================================== -->
+
+  @if (!isLoading && savedJobs.length > 0) {
+
+    <div class="jobs-header">
+
+      <div>
+
+        <h2>
+          Your Saved Jobs
+        </h2>
+
+        <p>
+          {{ savedJobs.length }}
+          {{ savedJobs.length === 1 ? 'job' : 'jobs' }}
+          saved
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="refresh-button"
+        (click)="refreshSavedJobs()"
+        [disabled]="isLoading"
+      >
+
+        ↻ Refresh
+
+      </button>
+
+    </div>
+
+
+    <div class="saved-jobs-list">
+
+      @for (savedJob of savedJobs; track savedJob.id) {
+
+        <article class="saved-job-card">
+
+          <!-- ============================================= -->
+          <!-- JOB ICON -->
+          <!-- ============================================= -->
+
+          <div class="job-icon">
+
+            {{ savedJob.jobTitle.charAt(0).toUpperCase() }}
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- JOB CONTENT -->
+          <!-- ============================================= -->
+
+          <div class="job-content">
+
+            <div class="job-title-row">
+
+              <div>
+
+                <h3>
+                  {{ savedJob.jobTitle }}
+                </h3>
+
+                <span class="saved-label">
+                  🔖 Saved
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- =========================================== -->
+            <!-- JOB META -->
+            <!-- =========================================== -->
+
+            <div class="job-meta">
+
+              @if (savedJob.location) {
+
+                <span>
+                  📍 {{ savedJob.location }}
+                </span>
+
+              }
+
+
+              @if (savedJob.employmentType) {
+
+                <span>
+                  💼 {{ savedJob.employmentType }}
+                </span>
+
+              }
+
+
+              <span>
+
+                🧑‍💻
+
+                {{ savedJob.minimumExperience }}
+                -
+                {{ savedJob.maximumExperience }}
+
+                years
+
+              </span>
+
+            </div>
+
+
+            <!-- =========================================== -->
+            <!-- SALARY -->
+            <!-- =========================================== -->
+
+            @if (
+              savedJob.minimumSalary ||
+              savedJob.maximumSalary
+            ) {
+
+              <div class="salary">
+
+                💰
+
+                @if (savedJob.minimumSalary) {
+
+                  ₹{{ savedJob.minimumSalary | number }}
+
+                }
+
+
+                @if (
+                  savedJob.minimumSalary &&
+                  savedJob.maximumSalary
+                ) {
+
+                  -
+
+                }
+
+
+                @if (savedJob.maximumSalary) {
+
+                  ₹{{ savedJob.maximumSalary | number }}
+
+                }
+
+              </div>
+
+            }
+
+
+            <!-- =========================================== -->
+            <!-- DEADLINE -->
+            <!-- =========================================== -->
+
+            <div class="deadline">
+
+              📅
+
+              Application deadline:
+
+              <strong>
+                {{ savedJob.applicationDeadline | date:'mediumDate' }}
+              </strong>
+
+            </div>
+
+
+            <!-- =========================================== -->
+            <!-- SAVED DATE -->
+            <!-- =========================================== -->
+
+            <div class="saved-date">
+
+              Saved on
+              {{ savedJob.savedAt | date:'mediumDate' }}
+
+            </div>
+
+
+            <!-- =========================================== -->
+            <!-- ACTIONS -->
+            <!-- =========================================== -->
+
+            <div class="job-actions">
+
+              <button
+                type="button"
+                class="view-job-button"
+                (click)="viewJob(savedJob.jobId)"
+              >
+
+                View Job
+
+              </button>
+
+
+              <button
+                type="button"
+                class="remove-job-button"
+                [disabled]="removingJobId === savedJob.jobId"
+                (click)="removeSavedJob(savedJob.jobId)"
+              >
+
+                @if (
+                  removingJobId === savedJob.jobId
+                ) {
+
+                  Removing...
+
+                }
+
+                @else {
+
+                  Remove
+
+                }
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- EMPTY STATE -->
+  <!-- ===================================================== -->
+
+  @if (!isLoading && savedJobs.length === 0 && !errorMessage) {
+
+    <div class="empty-state">
+
+      <div class="empty-icon">
+        🔖
+      </div>
+
+      <h2>
+        No Saved Jobs Yet
+      </h2>
+
+      <p>
+        Jobs you save will appear here so you can easily
+        find them later.
+      </p>
+
+
+      <button
+        type="button"
+        class="browse-jobs-button"
+        (click)="browseJobs()"
+      >
+
+        Browse Jobs
+
+      </button>
+
+    </div>
+
+  }
+
+</div>
+
+  </main>
+
+</div>

@@ -1,0 +1,166 @@
+<div class="page-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+    <app-navbar></app-navbar>
+
+    <section class="interview-page" aria-labelledby="interview-title">
+      <header class="interview-header">
+        <div>
+          <span class="eyebrow">CAREERAI PRACTICE STUDIO</span>
+          <h1 id="interview-title">AI Interview</h1>
+          <p>Practice role-specific questions and receive structured feedback from CareerAI.</p>
+        </div>
+        @if (stage !== 'setup') {
+          <button type="button" class="secondary-button" (click)="restartInterview()">
+            Start over
+          </button>
+        }
+      </header>
+
+      @if (errorMessage) {
+        <div class="interview-error" role="alert">
+          <strong>Interview update</strong>
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      @if (stage === 'setup') {
+        <section class="setup-layout">
+          <div class="intro-panel">
+            <span class="panel-eyebrow">PRACTICE WITH PURPOSE</span>
+            <h2>Build confidence before the real interview.</h2>
+            <p>
+              CareerAI will ask technical questions for your selected role and evaluate each answer for correctness, completeness, understanding, and clarity.
+            </p>
+            <div class="practice-points">
+              <span><b>01</b> Role-specific questions</span>
+              <span><b>02</b> Feedback after every answer</span>
+              <span><b>03</b> Final score and improvement areas</span>
+            </div>
+          </div>
+
+          <form class="setup-card" (ngSubmit)="startInterview()">
+            <span class="panel-eyebrow">SET UP YOUR SESSION</span>
+            <h2>Choose your focus</h2>
+
+            <label for="job-title">Target job title</label>
+            <input
+              id="job-title"
+              name="jobTitle"
+              type="text"
+              [(ngModel)]="jobTitle"
+              placeholder="e.g. .NET Backend Developer"
+              [disabled]="isLoading">
+
+            <label for="question-count">Number of questions</label>
+            <select
+              id="question-count"
+              name="numberOfQuestions"
+              [(ngModel)]="numberOfQuestions"
+              [disabled]="isLoading">
+              <option [ngValue]="3">3 questions</option>
+              <option [ngValue]="5">5 questions</option>
+              <option [ngValue]="7">7 questions</option>
+              <option [ngValue]="10">10 questions</option>
+            </select>
+
+            <button type="submit" class="primary-button" [disabled]="isLoading">
+              @if (isLoading) {
+                Preparing interview...
+              } @else {
+                Start AI interview <span aria-hidden="true">→</span>
+              }
+            </button>
+          </form>
+        </section>
+      }
+
+      @if (stage === 'question' || stage === 'feedback') {
+        <section class="interview-workspace">
+          <div class="progress-row">
+            <div>
+              <span class="panel-eyebrow">{{ jobTitle || 'INTERVIEW SESSION' }}</span>
+              <strong>Question {{ questionNumber }} of {{ totalQuestions }}</strong>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <span [style.width.%]="(questionNumber / totalQuestions) * 100"></span>
+            </div>
+          </div>
+
+          <div class="question-card">
+            <span class="question-label">CURRENT QUESTION</span>
+            <h2>{{ question }}</h2>
+          </div>
+
+          @if (stage === 'question') {
+            <form class="answer-card" (ngSubmit)="submitAnswer()">
+              <label for="interview-answer">Your answer</label>
+              <textarea
+                id="interview-answer"
+                name="answer"
+                rows="8"
+                [(ngModel)]="answer"
+                placeholder="Explain your approach, reasoning, and examples..."
+                [disabled]="isSubmitting"></textarea>
+              <div class="answer-footer">
+                <span>Take a moment to give a clear, complete answer.</span>
+                <button type="submit" class="primary-button" [disabled]="isSubmitting || !answer.trim()">
+                  @if (isSubmitting) {
+                    Evaluating...
+                  } @else {
+                    Submit answer <span aria-hidden="true">→</span>
+                  }
+                </button>
+              </div>
+            </form>
+          } @else if (lastResponse) {
+            <section class="feedback-card" aria-live="polite">
+              <div class="score-badge">
+                <strong>{{ lastResponse.score }}</strong>
+                <span>/ 10</span>
+              </div>
+              <div class="feedback-copy">
+                <span class="question-label">CAREERAI FEEDBACK</span>
+                <h2>Answer evaluated</h2>
+                <p>{{ lastResponse.feedback }}</p>
+              </div>
+              <button type="button" class="primary-button" (click)="continueToNextQuestion()">
+                Next question <span aria-hidden="true">→</span>
+              </button>
+            </section>
+          }
+        </section>
+      }
+
+      @if (stage === 'result' && result) {
+        <section class="result-layout">
+          <div class="result-hero">
+            <span class="panel-eyebrow">INTERVIEW COMPLETE</span>
+            <h2>Your practice session is complete.</h2>
+            <p>Use this feedback to focus your preparation before the next opportunity.</p>
+            <button type="button" class="primary-button" (click)="restartInterview()">
+              Practice another role <span aria-hidden="true">→</span>
+            </button>
+          </div>
+
+          <div class="result-score-card">
+            <span class="question-label">OVERALL SCORE</span>
+            <strong>{{ result.percentage }}%</strong>
+            <span>{{ result.totalScore }} / {{ result.maximumScore }} points</span>
+          </div>
+
+          <div class="result-detail-card">
+            <span class="question-label">STRENGTHS</span>
+            <p>{{ result.strengths }}</p>
+          </div>
+
+          <div class="result-detail-card improvement-card">
+            <span class="question-label">AREAS TO IMPROVE</span>
+            <p>{{ result.improvements }}</p>
+          </div>
+        </section>
+      }
+    </section>
+  </main>
+</div>

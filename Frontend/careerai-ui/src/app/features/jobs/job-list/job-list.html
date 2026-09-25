@@ -1,0 +1,412 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="jobs-page">
+
+  <!-- ===================================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <span class="page-label">
+        CAREERAI JOBS
+      </span>
+
+      <h1>
+        Find Your Next Opportunity
+      </h1>
+
+      <p>
+        Explore jobs and find opportunities that match your skills.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SEARCH -->
+  <!-- ===================================================== -->
+
+  <div class="search-card" role="search">
+
+    <label class="search-label" for="job-search">
+      Search open roles
+    </label>
+
+    <div class="search-box">
+
+      <span class="search-icon">
+        🔍
+      </span>
+
+      <input
+        id="job-search"
+        type="text"
+        placeholder="Search by job title, company, location..."
+        aria-label="Search jobs by title, company, or location"
+        [value]="searchTerm"
+        (input)="onSearch($event)"
+      />
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- LOADING -->
+  <!-- ===================================================== -->
+
+  @if (isLoading) {
+
+    <div class="loading-state">
+
+      <div class="loading-spinner"></div>
+
+      <p>
+        Loading jobs...
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  @if (!isLoading && errorMessage) {
+
+    <div class="error-state">
+
+      <div class="error-icon">
+        ⚠️
+      </div>
+
+      <h3>
+        Unable to load jobs
+      </h3>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="loadJobs()"
+      >
+
+        Try Again
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- JOB RESULTS -->
+  <!-- ===================================================== -->
+
+  @if (!isLoading && !errorMessage) {
+
+    <div class="results-header">
+
+      <div>
+
+        <h2>
+          Available Jobs
+        </h2>
+
+        <span>
+          {{ filteredJobs.length }}
+          {{ filteredJobs.length === 1 ? 'job' : 'jobs' }}
+          found
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- NO JOBS -->
+    <!-- =================================================== -->
+
+    @if (filteredJobs.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          🔎
+        </div>
+
+        <h3>
+          No jobs found
+        </h3>
+
+        <p>
+          Try searching with a different job title,
+          company or location.
+        </p>
+
+      </div>
+
+    }
+
+
+    <!-- =================================================== -->
+    <!-- JOB CARDS -->
+    <!-- =================================================== -->
+
+    @else {
+
+      <div class="jobs-grid">
+
+        @for (
+          job of filteredJobs;
+          track job.id
+        ) {
+
+          <article class="job-card">
+
+
+            <!-- ================================================= -->
+            <!-- JOB HEADER -->
+            <!-- ================================================= -->
+
+            <div class="job-card-header">
+
+              <div class="company-icon">
+
+                {{ job.recruiter?.companyName?.charAt(0) || 'J' }}
+
+              </div>
+
+
+              <div class="job-title-area">
+
+                <h3>
+                  {{ job.title }}
+                </h3>
+
+                <p>
+                  {{ job.recruiter?.companyName || 'Company' }}
+                </p>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- JOB INFORMATION -->
+            <!-- ================================================= -->
+
+            <div class="job-info">
+
+
+              @if (job.location) {
+
+                <span class="job-info-item">
+
+                  📍
+
+                  {{ job.location }}
+
+                </span>
+
+              }
+
+
+              @if (job.employmentType) {
+
+                <span class="job-info-item">
+
+                  💼
+
+                  {{ job.employmentType }}
+
+                </span>
+
+              }
+
+
+              <span class="job-info-item">
+
+                🧑‍💻
+
+                {{ job.minimumExperience }}
+                -
+                {{ job.maximumExperience }}
+                years
+
+              </span>
+
+            </div>
+
+
+
+            <!-- ================================================= -->
+            <!-- SALARY -->
+            <!-- ================================================= -->
+
+            @if (
+              job.minimumSalary ||
+              job.maximumSalary
+            ) {
+
+              <div class="salary">
+
+                💰
+
+                @if (job.minimumSalary) {
+
+                  ₹{{ job.minimumSalary | number }}
+
+                }
+
+                @if (
+                  job.minimumSalary &&
+                  job.maximumSalary
+                ) {
+
+                  -
+
+                }
+
+                @if (job.maximumSalary) {
+
+                  ₹{{ job.maximumSalary | number }}
+
+                }
+
+              </div>
+
+            }
+
+
+
+            <!-- ================================================= -->
+            <!-- EDUCATION -->
+            <!-- ================================================= -->
+
+            @if (job.requiredEducation) {
+
+              <div class="education">
+
+                🎓
+
+                {{ job.requiredEducation }}
+
+              </div>
+
+            }
+
+
+
+            <!-- ================================================= -->
+            <!-- DESCRIPTION -->
+            <!-- ================================================= -->
+
+            <p class="job-description">
+
+              {{ job.description }}
+
+            </p>
+
+
+
+            <!-- ================================================= -->
+            <!-- SKILLS -->
+            <!-- ================================================= -->
+
+            @if (
+              job.jobSkills &&
+              job.jobSkills.length > 0
+            ) {
+
+              <div class="skills">
+
+                @for (
+                  jobSkill of job.jobSkills.slice(0, 5);
+                  track jobSkill.id
+                ) {
+
+                  @if (jobSkill.skill) {
+
+                    <span class="skill-tag">
+
+                      {{ jobSkill.skill.name }}
+
+                    </span>
+
+                  }
+
+                }
+
+              </div>
+
+            }
+
+
+
+            <!-- ================================================= -->
+            <!-- FOOTER -->
+            <!-- ================================================= -->
+
+            <div class="job-card-footer">
+
+              <span class="deadline">
+
+                Deadline:
+
+                {{ job.applicationDeadline | date:'mediumDate' }}
+
+              </span>
+
+
+           <button
+  type="button"
+  class="details-button"
+  (click)="viewJobDetails(job.id)"
+>
+  View Details
+
+  <span>
+    →
+  </span>
+</button>
+
+            </div>
+
+
+          </article>
+
+        }
+
+      </div>
+
+    }
+
+  }
+
+    </div>
+
+  </main>
+
+</div>

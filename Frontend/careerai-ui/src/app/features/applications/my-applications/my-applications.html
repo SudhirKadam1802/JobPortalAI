@@ -1,0 +1,473 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="applications-page">
+
+  <!-- ===================================================== -->
+  <!-- PAGE HEADER -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <span class="page-label">
+        CAREERAI
+      </span>
+
+      <h1>
+        My Applications
+      </h1>
+
+      <p>
+        Track the jobs you have applied for and monitor
+        your application status.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="refresh-button"
+      [disabled]="isLoading"
+      (click)="refreshApplications()"
+    >
+
+      🔄
+
+      @if (isLoading) {
+
+        Loading...
+
+      } @else {
+
+        Refresh
+
+      }
+
+    </button>
+
+  </div>
+
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+
+      <span>
+        ❌
+      </span>
+
+      <div>
+
+        <strong>
+          Unable to load applications
+        </strong>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+      </div>
+
+    </div>
+
+  }
+
+
+
+  <!-- ===================================================== -->
+  <!-- LOADING -->
+  <!-- ===================================================== -->
+
+  @if (isLoading) {
+
+    <div class="loading-state">
+
+      <div class="loading-spinner"></div>
+
+      <h3>
+        Loading your applications...
+      </h3>
+
+      <p>
+        Please wait while we fetch your applications.
+      </p>
+
+    </div>
+
+  }
+
+
+
+  <!-- ===================================================== -->
+  <!-- EMPTY STATE -->
+  <!-- ===================================================== -->
+
+  @if (
+    !isLoading &&
+    !errorMessage &&
+    applications.length === 0
+  ) {
+
+    <div class="empty-state">
+
+      <div class="empty-icon">
+        📋
+      </div>
+
+      <h2>
+        No Applications Yet
+      </h2>
+
+      <p>
+        You haven't applied for any jobs yet.
+        Explore available opportunities and start
+        your job search.
+      </p>
+
+      <button
+        type="button"
+        class="browse-button"
+        (click)="browseJobs()"
+      >
+
+        Browse Jobs
+
+        <span>
+          →
+        </span>
+
+      </button>
+
+    </div>
+
+  }
+
+
+
+  <!-- ===================================================== -->
+  <!-- APPLICATIONS -->
+  <!-- ===================================================== -->
+
+  @if (
+    !isLoading &&
+    applications.length > 0
+  ) {
+
+    <div class="applications-content">
+
+
+      <!-- ================================================= -->
+      <!-- SUMMARY -->
+      <!-- ================================================= -->
+
+      <div class="applications-summary">
+
+        <div>
+
+          <span class="summary-label">
+            TOTAL APPLICATIONS
+          </span>
+
+          <strong>
+            {{ applications.length }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span class="summary-label">
+            ACTIVE APPLICATIONS
+          </span>
+
+          <strong>
+
+            {{
+              applications.filter(
+                application =>
+                  application.status === 1 ||
+                  application.status === 2 ||
+                  application.status === 3
+              ).length
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ================================================= -->
+      <!-- APPLICATION LIST -->
+      <!-- ================================================= -->
+
+      <div class="application-list">
+
+        @for (
+          application of applications;
+          track application.id
+        ) {
+
+          <div class="application-card">
+
+
+            <!-- =========================================== -->
+            <!-- APPLICATION HEADER -->
+            <!-- =========================================== -->
+
+            <div class="application-header">
+
+              <div class="job-icon">
+                J
+              </div>
+
+
+              <div class="job-info">
+
+                <h2>
+                  {{ application.jobTitle || 'Job Application' }}
+                </h2>
+
+                <span>
+                  Application ID:
+                  {{ application.id }}
+                </span>
+
+              </div>
+
+
+              <!-- STATUS -->
+
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(application.status)"
+              >
+
+                {{ application.statusName || getStatusText(application.status) }}
+
+              </span>
+
+            </div>
+
+
+
+            <!-- =========================================== -->
+            <!-- APPLICATION DETAILS -->
+            <!-- =========================================== -->
+
+            <div class="application-details">
+
+
+              <!-- Applied Date -->
+
+              <div class="detail-item">
+
+                <span class="detail-icon">
+                  📅
+                </span>
+
+                <div>
+
+                  <span class="detail-label">
+                    Applied On
+                  </span>
+
+                  <strong>
+                    {{ application.appliedAt | date:'mediumDate' }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+
+              <!-- Current Status -->
+
+              <div class="detail-item">
+
+                <span class="detail-icon">
+                  📊
+                </span>
+
+                <div>
+
+                  <span class="detail-label">
+                    Current Status
+                  </span>
+
+                  <strong>
+                    {{ application.statusName || getStatusText(application.status) }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+
+              <!-- Last Updated -->
+
+              @if (application.updatedAt) {
+
+                <div class="detail-item">
+
+                  <span class="detail-icon">
+                    🔄
+                  </span>
+
+                  <div>
+
+                    <span class="detail-label">
+                      Last Updated
+                    </span>
+
+                    <strong>
+                      {{ application.updatedAt | date:'mediumDate' }}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              }
+
+            </div>
+
+
+
+            <!-- =========================================== -->
+            <!-- COVER LETTER -->
+            <!-- =========================================== -->
+
+            @if (application.coverLetter) {
+
+              <div class="cover-letter">
+
+                <span class="cover-letter-label">
+                  COVER LETTER
+                </span>
+
+                <p>
+                  {{ application.coverLetter }}
+                </p>
+
+              </div>
+
+            }
+
+
+
+            <!-- =========================================== -->
+            <!-- STATUS MESSAGE -->
+            <!-- =========================================== -->
+
+            <div class="application-status-message">
+
+              @if (application.status === 1) {
+
+                <span>
+                  📨 Your application has been submitted.
+                </span>
+
+              }
+              @else if (application.status === 2) {
+
+                <span>
+                  ⭐ Your application has been shortlisted.
+                </span>
+
+              }
+              @else if (application.status === 3) {
+
+                <span>
+                  🎯 You have been selected for an interview.
+                </span>
+
+              }
+              @else if (application.status === 4) {
+
+                <span>
+                  Your application was not selected.
+                </span>
+
+              }
+              @else if (application.status === 5) {
+
+                <span>
+                  🎉 Congratulations! You have been hired.
+                </span>
+
+              }
+              @else {
+
+                <span>
+                  Application status has been updated.
+                </span>
+
+              }
+
+            </div>
+
+
+
+            <!-- =========================================== -->
+            <!-- FOOTER -->
+            <!-- =========================================== -->
+
+            <div class="application-footer">
+
+              <span class="application-note">
+
+                {{ application.statusName || getStatusText(application.status) }}
+
+              </span>
+
+
+              <button
+                type="button"
+                class="view-job-button"
+                (click)="viewJob(application.jobId)"
+              >
+
+                View Job
+
+                <span>
+                  →
+                </span>
+
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </div>
+
+  }
+
+</div>
+
+  </main>
+
+</div>

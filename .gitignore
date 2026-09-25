@@ -1,0 +1,23 @@
+# .NET build files
+**/bin/
+**/obj/
+.vs/
+
+# Angular
+**/node_modules/
+**/dist/
+
+# Environment secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Application configuration containing secrets
+Backend/src/CareerAI.API/appsettings.json
+Backend/src/CareerAI.API/appsettings.Development.json
+
+# Uploaded resumes
+Backend/src/CareerAI.API/wwwroot/resumes/
+
+# Logs
+*.log

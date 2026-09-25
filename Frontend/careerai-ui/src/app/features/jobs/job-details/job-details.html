@@ -1,0 +1,790 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="job-details-page">
+
+  <!-- ===================================================== -->
+  <!-- LOADING -->
+  <!-- ===================================================== -->
+
+  @if (isLoading) {
+
+    <div class="loading-state">
+
+      <div class="loading-spinner"></div>
+
+      <p>
+        Loading job details...
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  @if (!isLoading && errorMessage) {
+
+    <div class="error-state">
+
+      <div class="error-icon">
+        ⚠️
+      </div>
+
+      <h2>
+        Unable to load job
+      </h2>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="goBack()"
+      >
+
+        ← Back to Jobs
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- JOB DETAILS -->
+  <!-- ===================================================== -->
+
+  @if (!isLoading && job) {
+
+    <div class="details-container">
+
+
+      <!-- ================================================= -->
+      <!-- BACK BUTTON -->
+      <!-- ================================================= -->
+
+      <button
+        type="button"
+        class="back-link"
+        (click)="goBack()"
+      >
+
+        ← Back to Jobs
+
+      </button>
+
+
+      <!-- ================================================= -->
+      <!-- JOB HEADER -->
+      <!-- ================================================= -->
+
+      <div class="job-header-card">
+
+        <div class="company-icon">
+          J
+        </div>
+
+
+        <div class="job-header-content">
+
+          <span class="job-label">
+            JOB OPPORTUNITY
+          </span>
+
+
+          <h1>
+            {{ job.title }}
+          </h1>
+
+
+          <p class="company-name">
+            CareerAI Job Opportunity
+          </p>
+
+
+          <div class="job-meta">
+
+            @if (job.location) {
+
+              <span>
+                📍 {{ job.location }}
+              </span>
+
+            }
+
+
+            @if (job.employmentType) {
+
+              <span>
+                💼 {{ job.employmentType }}
+              </span>
+
+            }
+
+
+            <span>
+
+              🧑‍💻
+
+              {{ job.minimumExperience }}
+              -
+              {{ job.maximumExperience }}
+
+              years
+
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- MAIN CONTENT -->
+      <!-- ================================================= -->
+
+      <div class="details-grid">
+
+
+        <!-- ================================================= -->
+        <!-- LEFT SIDE -->
+        <!-- ================================================= -->
+
+        <div class="main-content">
+
+
+          <!-- ================================================= -->
+          <!-- ABOUT JOB -->
+          <!-- ================================================= -->
+
+          <section class="details-card">
+
+            <h2>
+              About the Job
+            </h2>
+
+
+            <p class="description">
+
+              {{ job.description }}
+
+            </p>
+
+          </section>
+
+
+          <!-- ================================================= -->
+          <!-- EDUCATION -->
+          <!-- ================================================= -->
+
+          @if (job.requiredEducation) {
+
+            <section class="details-card">
+
+              <h2>
+                Education
+              </h2>
+
+
+              <div class="detail-row">
+
+                <span class="detail-icon">
+                  🎓
+                </span>
+
+
+                <div>
+
+                  <strong>
+                    Required Education
+                  </strong>
+
+
+                  <p>
+                    {{ job.requiredEducation }}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </section>
+
+          }
+
+
+          <!-- ================================================= -->
+          <!-- EXPERIENCE -->
+          <!-- ================================================= -->
+
+          <section class="details-card">
+
+            <h2>
+              Experience Required
+            </h2>
+
+
+            <div class="detail-row">
+
+              <span class="detail-icon">
+                🧑‍💻
+              </span>
+
+
+              <div>
+
+                <strong>
+                  Experience
+                </strong>
+
+
+                <p>
+
+                  {{ job.minimumExperience }}
+                  -
+                  {{ job.maximumExperience }}
+
+                  years
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ================================================= -->
+          <!-- LOCATION -->
+          <!-- ================================================= -->
+
+          <section class="details-card">
+
+            <h2>
+              Location
+            </h2>
+
+
+            <div class="detail-row">
+
+              <span class="detail-icon">
+                📍
+              </span>
+
+
+              <div>
+
+                <strong>
+                  Job Location
+                </strong>
+
+
+                <p>
+                  {{ job.location || 'Not specified' }}
+                </p>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- RIGHT SIDEBAR -->
+        <!-- ================================================= -->
+
+        <aside class="sidebar">
+
+
+          <!-- ================================================= -->
+          <!-- APPLY CARD -->
+          <!-- ================================================= -->
+
+          <div class="apply-card">
+
+            <h2>
+              Interested in this job?
+            </h2>
+
+
+            <p>
+              Apply now and take the next step
+              toward your career.
+            </p>
+
+
+            <!-- ============================================= -->
+            <!-- APPLY BUTTON -->
+            <!-- ============================================= -->
+
+            @if (isCheckingApplication) {
+
+              <button
+                type="button"
+                class="apply-button"
+                disabled
+              >
+
+                Checking application...
+
+              </button>
+
+            }
+
+            @else if (hasApplied) {
+
+              <div class="already-applied">
+
+                <div class="already-applied-icon">
+                  ✓
+                </div>
+
+                <div>
+
+                  <strong>
+                    Already Applied
+                  </strong>
+
+                  <span>
+                    You have already applied for this job.
+                  </span>
+
+                </div>
+
+              </div>
+
+            }
+
+            @else if (!showCoverLetter) {
+
+              <button
+                type="button"
+                class="apply-button"
+                [disabled]="isApplying"
+                (click)="startApplication()"
+              >
+
+                @if (isApplying) {
+
+                  Submitting...
+
+                }
+
+                @else {
+
+                  Apply Now
+
+                }
+
+              </button>
+
+            }
+
+
+            <!-- ============================================= -->
+            <!-- APPLICATION FORM -->
+            <!-- ============================================= -->
+
+            @if (showCoverLetter) {
+
+              <div class="application-form">
+
+                <label for="coverLetter">
+
+                  Cover Letter
+
+                  <span>
+                    (Optional)
+                  </span>
+
+                </label>
+
+
+                <textarea
+                  id="coverLetter"
+                  rows="6"
+                  placeholder="Write a short message to the recruiter..."
+                  [(ngModel)]="coverLetter"
+                ></textarea>
+
+
+                <div class="application-actions">
+
+
+                  <!-- Cancel -->
+
+                  <button
+                    type="button"
+                    class="cancel-application-button"
+                    [disabled]="isApplying"
+                    (click)="cancelApplication()"
+                  >
+
+                    Cancel
+
+                  </button>
+
+
+                  <!-- Submit -->
+
+                  <button
+                    type="button"
+                    class="submit-application-button"
+                    [disabled]="isApplying"
+                    (click)="submitApplication()"
+                  >
+
+                    @if (isApplying) {
+
+                      Submitting...
+
+                    }
+
+                    @else {
+
+                      Submit Application
+
+                    }
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            }
+
+
+            <!-- ============================================= -->
+            <!-- SUCCESS MESSAGE -->
+            <!-- ============================================= -->
+
+            @if (applicationMessage) {
+
+              <div class="application-success">
+
+                ✅
+
+                {{ applicationMessage }}
+
+              </div>
+
+            }
+
+
+            <!-- ============================================= -->
+            <!-- ERROR MESSAGE -->
+            <!-- ============================================= -->
+
+            @if (applicationError) {
+
+              <div class="application-error">
+
+                ❌
+
+                {{ applicationError }}
+
+              </div>
+
+            }
+
+
+            <!-- ============================================= -->
+            <!-- SAVE JOB -->
+            <!-- ============================================= -->
+
+            <div class="save-job-section">
+
+              @if (isCheckingSavedJob) {
+
+                <button
+                  type="button"
+                  class="save-job-button"
+                  disabled
+                >
+
+                  Checking saved status...
+
+                </button>
+
+              }
+
+              @else {
+
+                <button
+                  type="button"
+                  class="save-job-button"
+                  [class.saved]="isJobSaved"
+                  [disabled]="isSavingJob"
+                  (click)="toggleSavedJob()"
+                >
+
+                  @if (isSavingJob) {
+
+                    Saving...
+
+                  }
+
+                  @else if (isJobSaved) {
+
+                    🔖 Saved
+
+                  }
+
+                  @else {
+
+                    🔖 Save Job
+
+                  }
+
+                </button>
+
+              }
+
+
+              @if (savedJobMessage) {
+
+                <div class="saved-job-success">
+
+                  ✅ {{ savedJobMessage }}
+
+                </div>
+
+              }
+
+
+              @if (savedJobError) {
+
+                <div class="saved-job-error">
+
+                  ❌ {{ savedJobError }}
+
+                </div>
+
+              }
+
+            </div>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- JOB INFORMATION -->
+          <!-- ================================================= -->
+
+          <div class="info-card">
+
+            <h3>
+              Job Information
+            </h3>
+
+
+            <!-- ================================================= -->
+            <!-- SALARY -->
+            <!-- ================================================= -->
+
+            @if (
+              job.minimumSalary ||
+              job.maximumSalary
+            ) {
+
+              <div class="info-item">
+
+                <span class="info-icon">
+                  💰
+                </span>
+
+
+                <div>
+
+                  <span class="info-label">
+                    Salary
+                  </span>
+
+
+                  <strong>
+
+                    @if (job.minimumSalary) {
+
+                      ₹{{ job.minimumSalary | number }}
+
+                    }
+
+
+                    @if (
+                      job.minimumSalary &&
+                      job.maximumSalary
+                    ) {
+
+                      -
+
+                    }
+
+
+                    @if (job.maximumSalary) {
+
+                      ₹{{ job.maximumSalary | number }}
+
+                    }
+
+                  </strong>
+
+                </div>
+
+              </div>
+
+            }
+
+
+            <!-- ================================================= -->
+            <!-- LOCATION -->
+            <!-- ================================================= -->
+
+            <div class="info-item">
+
+              <span class="info-icon">
+                📍
+              </span>
+
+
+              <div>
+
+                <span class="info-label">
+                  Location
+                </span>
+
+
+                <strong>
+
+                  {{ job.location || 'Not specified' }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- EMPLOYMENT TYPE -->
+            <!-- ================================================= -->
+
+            <div class="info-item">
+
+              <span class="info-icon">
+                💼
+              </span>
+
+
+              <div>
+
+                <span class="info-label">
+                  Employment Type
+                </span>
+
+
+                <strong>
+
+                  {{ job.employmentType || 'Not specified' }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- EXPERIENCE -->
+            <!-- ================================================= -->
+
+            <div class="info-item">
+
+              <span class="info-icon">
+                🧑‍💻
+              </span>
+
+
+              <div>
+
+                <span class="info-label">
+                  Experience
+                </span>
+
+
+                <strong>
+
+                  {{ job.minimumExperience }}
+                  -
+                  {{ job.maximumExperience }}
+
+                  years
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- DEADLINE -->
+            <!-- ================================================= -->
+
+            <div class="info-item">
+
+              <span class="info-icon">
+                📅
+              </span>
+
+
+              <div>
+
+                <span class="info-label">
+                  Application Deadline
+                </span>
+
+
+                <strong>
+
+                  {{ job.applicationDeadline | date:'mediumDate' }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    </div>
+
+  }
+
+    </div>
+
+  </main>
+
+</div>

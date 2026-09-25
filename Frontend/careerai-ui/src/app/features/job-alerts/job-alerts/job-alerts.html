@@ -1,0 +1,326 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="job-alerts-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">CAREERAI</span>
+      <h1>Job Alerts</h1>
+      <p>
+        Get notified about jobs that match your career preferences.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="refreshAlerts()"
+      [disabled]="isLoading">
+      ↻ Refresh
+    </button>
+  </div>
+
+  <!-- Success Message -->
+  <div
+    class="message success-message"
+    *ngIf="successMessage">
+    ✓ {{ successMessage }}
+  </div>
+
+  <!-- Error Message -->
+  <div
+    class="message error-message"
+    *ngIf="errorMessage">
+    ⚠ {{ errorMessage }}
+  </div>
+
+  <!-- Create Alert Card -->
+  <section class="create-card">
+
+    <div class="section-heading">
+      <div class="section-icon">🔔</div>
+
+      <div>
+        <h2>Create Job Alert</h2>
+        <p>
+          Choose at least one filter to create your alert.
+        </p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Keyword -->
+      <div class="form-group">
+        <label for="keyword">
+          Job Keyword
+        </label>
+
+        <input
+          id="keyword"
+          type="text"
+          [(ngModel)]="keyword"
+          placeholder="e.g. Angular Developer"
+          autocomplete="off">
+      </div>
+
+      <!-- Location -->
+      <div class="form-group">
+        <label for="location">
+          Location
+        </label>
+
+        <input
+          id="location"
+          type="text"
+          [(ngModel)]="location"
+          placeholder="e.g. Pune"
+          autocomplete="off">
+      </div>
+
+      <!-- Salary -->
+      <div class="form-group">
+        <label for="minimumSalary">
+          Minimum Salary
+        </label>
+
+        <input
+          id="minimumSalary"
+          type="number"
+          [(ngModel)]="minimumSalary"
+          placeholder="e.g. 500000"
+          min="0">
+      </div>
+
+      <!-- Active -->
+      <div class="form-group active-group">
+        <label>Alert Status</label>
+
+        <label class="switch-row">
+          <input
+            type="checkbox"
+            [(ngModel)]="isActive">
+
+          <span class="switch"></span>
+
+          <span>
+            {{ isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </label>
+      </div>
+
+    </div>
+
+    <div class="create-action">
+      <button
+        type="button"
+        class="create-btn"
+        (click)="createAlert()"
+        [disabled]="isCreating">
+
+        <span *ngIf="!isCreating">
+          + Create Alert
+        </span>
+
+        <span *ngIf="isCreating">
+          Creating...
+        </span>
+
+      </button>
+    </div>
+
+  </section>
+
+  <!-- Existing Alerts -->
+  <section class="alerts-section">
+
+    <div class="section-title-row">
+      <div>
+        <h2>My Job Alerts</h2>
+        <p>
+          Manage the job alerts you have created.
+        </p>
+      </div>
+
+      <span class="alert-count">
+        {{ alerts.length }}
+        {{ alerts.length === 1 ? 'Alert' : 'Alerts' }}
+      </span>
+    </div>
+
+    <!-- Loading -->
+    <div
+      class="loading-state"
+      *ngIf="isLoading">
+
+      <div class="spinner"></div>
+
+      <p>Loading your job alerts...</p>
+
+    </div>
+
+    <!-- Empty State -->
+    <div
+      class="empty-state"
+      *ngIf="!isLoading && alerts.length === 0">
+
+      <div class="empty-icon">
+        🔔
+      </div>
+
+      <h3>No Job Alerts Yet</h3>
+
+      <p>
+        Create your first alert to keep track of jobs
+        matching your preferences.
+      </p>
+
+    </div>
+
+    <!-- Alert Cards -->
+    <div
+      class="alerts-grid"
+      *ngIf="!isLoading && alerts.length > 0">
+
+      <article
+        class="alert-card"
+        *ngFor="let alert of alerts">
+
+        <!-- Card Header -->
+        <div class="alert-card-header">
+
+          <div class="alert-title">
+
+            <div class="bell-icon">
+              🔔
+            </div>
+
+            <div>
+              <h3>
+                {{ alert.keyword || 'Any Job' }}
+              </h3>
+
+              <span
+                class="status-badge"
+                [class.active]="alert.isActive"
+                [class.inactive]="!alert.isActive">
+
+                {{ alert.isActive ? 'Active' : 'Inactive' }}
+
+              </span>
+            </div>
+
+          </div>
+
+          <button
+            type="button"
+            class="delete-btn"
+            (click)="deleteAlert(alert.id)"
+            [disabled]="isDeleting"
+            title="Delete alert">
+
+            🗑
+
+          </button>
+
+        </div>
+
+        <!-- Filters -->
+        <div class="alert-details">
+
+          <div
+            class="detail-item"
+            *ngIf="alert.keyword">
+
+            <span class="detail-label">
+              Keyword
+            </span>
+
+            <span class="detail-value">
+              {{ alert.keyword }}
+            </span>
+
+          </div>
+
+          <div
+            class="detail-item"
+            *ngIf="alert.location">
+
+            <span class="detail-label">
+              Location
+            </span>
+
+            <span class="detail-value">
+              📍 {{ alert.location }}
+            </span>
+
+          </div>
+
+          <div
+            class="detail-item"
+            *ngIf="alert.minimumSalary !== null">
+
+            <span class="detail-label">
+              Minimum Salary
+            </span>
+
+            <span class="detail-value">
+              ₹{{ alert.minimumSalary | number }}
+            </span>
+
+          </div>
+
+          <div class="detail-item">
+
+            <span class="detail-label">
+              Created
+            </span>
+
+            <span class="detail-value">
+              {{ alert.createdAt | date:'dd MMM yyyy' }}
+            </span>
+
+          </div>
+
+        </div>
+
+        <!-- Card Footer -->
+        <div class="alert-card-footer">
+
+          <button
+            type="button"
+            class="toggle-btn"
+            (click)="toggleAlert(alert)">
+
+            {{ alert.isActive
+              ? '⏸ Deactivate'
+              : '▶ Activate' }}
+
+          </button>
+
+          <span class="created-time">
+            {{ alert.updatedAt
+              ? 'Updated ' + (alert.updatedAt | date:'dd MMM yyyy')
+              : 'No updates' }}
+          </span>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+</div>
+
+  </main>
+
+</div>

@@ -1,0 +1,606 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="recruiter-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+      <span class="eyebrow">CAREERAI</span>
+
+      <h1>My Jobs</h1>
+
+      <p>
+        Create, manage and monitor your job postings.
+      </p>
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="refresh-btn"
+        (click)="refreshJobs()"
+        [disabled]="isLoading">
+
+        ↻ Refresh
+
+      </button>
+
+      <button
+        type="button"
+        class="create-btn"
+        (click)="openCreateForm()">
+
+        + Create Job
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- Success Message -->
+  <div
+    class="message success-message"
+    *ngIf="successMessage">
+
+    ✓ {{ successMessage }}
+
+  </div>
+
+
+  <!-- Error Message -->
+  <div
+    class="message error-message"
+    *ngIf="errorMessage">
+
+    ⚠ {{ errorMessage }}
+
+  </div>
+
+
+  <!-- Loading -->
+  <div
+    class="loading-state"
+    *ngIf="isLoading">
+
+    <div class="spinner"></div>
+
+    <p>
+      Loading your jobs...
+    </p>
+
+  </div>
+
+
+  <!-- Empty State -->
+  <div
+    class="empty-state"
+    *ngIf="!isLoading && jobs.length === 0">
+
+    <div class="empty-icon">
+      💼
+    </div>
+
+    <h2>No Jobs Found</h2>
+
+    <p>
+      You haven't created any job postings yet.
+    </p>
+
+    <button
+      type="button"
+      class="create-btn"
+      (click)="openCreateForm()">
+
+      + Create Your First Job
+
+    </button>
+
+  </div>
+
+
+  <!-- Jobs -->
+  <div
+    class="jobs-grid"
+    *ngIf="!isLoading && jobs.length > 0">
+
+    <article
+      class="job-card"
+      *ngFor="let job of jobs">
+
+      <!-- Job Header -->
+      <div class="job-card-header">
+
+        <div>
+
+          <span class="job-type">
+            {{ job.employmentType }}
+          </span>
+
+          <h2>
+            {{ job.title }}
+          </h2>
+
+        </div>
+
+        <div class="job-menu">
+          ⋮
+        </div>
+
+      </div>
+
+
+      <!-- Job Information -->
+      <div class="job-info">
+
+        <div class="info-item">
+
+          <span class="info-icon">
+            📍
+          </span>
+
+          <span>
+            {{ job.location }}
+          </span>
+
+        </div>
+
+
+        <div class="info-item">
+
+          <span class="info-icon">
+            💼
+          </span>
+
+          <span>
+
+            {{ job.minimumExperience }}
+
+            -
+
+            {{ job.maximumExperience }}
+
+            years experience
+
+          </span>
+
+        </div>
+
+
+        <div
+          class="info-item"
+          *ngIf="job.minimumSalary || job.maximumSalary">
+
+          <span class="info-icon">
+            💰
+          </span>
+
+          <span>
+
+            <ng-container
+              *ngIf="job.minimumSalary">
+
+              ₹{{ job.minimumSalary }}
+
+            </ng-container>
+
+            <ng-container
+              *ngIf="job.minimumSalary && job.maximumSalary">
+
+              -
+
+            </ng-container>
+
+            <ng-container
+              *ngIf="job.maximumSalary">
+
+              ₹{{ job.maximumSalary }}
+
+            </ng-container>
+
+          </span>
+
+        </div>
+
+
+        <div
+          class="info-item"
+          *ngIf="job.requiredEducation">
+
+          <span class="info-icon">
+            🎓
+          </span>
+
+          <span>
+            {{ job.requiredEducation }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- Description -->
+      <p class="job-description">
+
+        {{ job.description }}
+
+      </p>
+
+
+      <!-- Deadline -->
+      <div class="deadline">
+
+        <span>
+          Application Deadline
+        </span>
+
+        <strong>
+
+          {{ job.applicationDeadline | date:'dd MMM yyyy' }}
+
+        </strong>
+
+      </div>
+
+
+      <!-- Created -->
+      <div class="created-date">
+
+        Posted on
+
+        {{ job.createdAt | date:'dd MMM yyyy' }}
+
+      </div>
+
+
+      <!-- Actions -->
+      <div class="job-actions">
+
+        <button
+          type="button"
+          class="applications-btn"
+          (click)="viewApplications(job.id)">
+
+          👥 Applications
+
+        </button>
+
+        <button
+          type="button"
+          class="edit-btn"
+          (click)="openEditForm(job)">
+
+          ✎ Edit
+
+        </button>
+
+        <button
+          type="button"
+          class="delete-btn"
+          (click)="deleteJob(job)"
+          [disabled]="isDeleting">
+
+          🗑 Delete
+
+        </button>
+
+      </div>
+
+    </article>
+
+  </div>
+
+
+  <!-- Create / Edit Form -->
+  <div
+    class="modal-overlay"
+    *ngIf="isFormOpen">
+
+    <div class="job-modal">
+
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+
+        <div>
+
+          <span class="eyebrow">
+            CAREERAI
+          </span>
+
+          <h2>
+
+            {{ isEditMode
+              ? 'Edit Job'
+              : 'Create New Job' }}
+
+          </h2>
+
+          <p>
+
+            {{ isEditMode
+              ? 'Update your job posting details.'
+              : 'Publish a new opportunity for candidates.' }}
+
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeForm()"
+          [disabled]="isSaving">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <!-- Form -->
+      <div class="job-form">
+
+
+        <!-- Title -->
+        <div class="form-group">
+
+          <label for="title">
+            Job Title
+          </label>
+
+          <input
+            id="title"
+            type="text"
+            [(ngModel)]="title"
+            placeholder="e.g. .NET Developer">
+
+        </div>
+
+
+        <!-- Employment Type -->
+        <div class="form-group">
+
+          <label for="employmentType">
+            Employment Type
+          </label>
+
+          <select
+            id="employmentType"
+            [(ngModel)]="employmentType">
+
+            <option value="">
+              Select employment type
+            </option>
+
+            <option value="Full-Time">
+              Full-Time
+            </option>
+
+            <option value="Part-Time">
+              Part-Time
+            </option>
+
+            <option value="Internship">
+              Internship
+            </option>
+
+            <option value="Contract">
+              Contract
+            </option>
+
+            <option value="Remote">
+              Remote
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Location -->
+        <div class="form-group">
+
+          <label for="location">
+            Location
+          </label>
+
+          <input
+            id="location"
+            type="text"
+            [(ngModel)]="location"
+            placeholder="e.g. Pune, Maharashtra">
+
+        </div>
+
+
+        <!-- Experience -->
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label for="minimumExperience">
+              Minimum Experience
+            </label>
+
+            <input
+              id="minimumExperience"
+              type="number"
+              min="0"
+              [(ngModel)]="minimumExperience">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="maximumExperience">
+              Maximum Experience
+            </label>
+
+            <input
+              id="maximumExperience"
+              type="number"
+              min="0"
+              [(ngModel)]="maximumExperience">
+
+          </div>
+
+        </div>
+
+
+        <!-- Salary -->
+        <div class="form-row">
+
+          <div class="form-group">
+
+            <label for="minimumSalary">
+              Minimum Salary
+            </label>
+
+            <input
+              id="minimumSalary"
+              type="number"
+              min="0"
+              [(ngModel)]="minimumSalary"
+              placeholder="e.g. 400000">
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="maximumSalary">
+              Maximum Salary
+            </label>
+
+            <input
+              id="maximumSalary"
+              type="number"
+              min="0"
+              [(ngModel)]="maximumSalary"
+              placeholder="e.g. 700000">
+
+          </div>
+
+        </div>
+
+
+        <!-- Education -->
+        <div class="form-group">
+
+          <label for="requiredEducation">
+            Required Education
+          </label>
+
+          <input
+            id="requiredEducation"
+            type="text"
+            [(ngModel)]="requiredEducation"
+            placeholder="e.g. BE / B.Tech Computer Engineering">
+
+        </div>
+
+
+        <!-- Deadline -->
+        <div class="form-group">
+
+          <label for="applicationDeadline">
+            Application Deadline
+          </label>
+
+          <input
+            id="applicationDeadline"
+            type="date"
+            [(ngModel)]="applicationDeadline">
+
+        </div>
+
+
+        <!-- Description -->
+        <div class="form-group">
+
+          <label for="description">
+            Job Description
+          </label>
+
+          <textarea
+            id="description"
+            rows="7"
+            [(ngModel)]="description"
+            placeholder="Describe the role, responsibilities, required skills and expectations...">
+          </textarea>
+
+        </div>
+
+
+        <!-- Form Error -->
+        <div
+          class="form-error"
+          *ngIf="errorMessage">
+
+          ⚠ {{ errorMessage }}
+
+        </div>
+
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="cancel-btn"
+            (click)="closeForm()"
+            [disabled]="isSaving">
+
+            Cancel
+
+          </button>
+
+
+          <button
+            type="button"
+            class="submit-btn"
+            (click)="saveJob()"
+            [disabled]="isSaving">
+
+            <span *ngIf="!isSaving">
+
+              {{ isEditMode
+                ? '✓ Update Job'
+                : '✓ Create Job' }}
+
+            </span>
+
+            <span *ngIf="isSaving">
+
+              Saving...
+
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  </main>
+
+</div>

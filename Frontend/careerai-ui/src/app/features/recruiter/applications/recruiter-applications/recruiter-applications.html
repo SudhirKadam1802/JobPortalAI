@@ -1,0 +1,361 @@
+<div class="page-layout">
+
+  <app-sidebar></app-sidebar>
+
+  <main class="page-main">
+
+    <app-navbar></app-navbar>
+
+    <div class="applications-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        CAREERAI
+      </span>
+
+      <h1>
+        Job Applications
+      </h1>
+
+      <p>
+        Review candidates and manage their application status.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="back-btn"
+      (click)="goBack()">
+
+      ← Back to My Jobs
+
+    </button>
+
+  </div>
+
+
+  <!-- Success Message -->
+  <div
+    class="message success-message"
+    *ngIf="successMessage">
+
+    ✓ {{ successMessage }}
+
+  </div>
+
+
+  <!-- Error Message -->
+  <div
+    class="message error-message"
+    *ngIf="errorMessage">
+
+    ⚠ {{ errorMessage }}
+
+  </div>
+
+
+  <!-- Loading -->
+  <div
+    class="loading-state"
+    *ngIf="isLoading">
+
+    <div class="spinner"></div>
+
+    <p>
+      Loading applications...
+    </p>
+
+  </div>
+
+
+  <!-- Empty State -->
+  <div
+    class="empty-state"
+    *ngIf="!isLoading && applications.length === 0">
+
+    <div class="empty-icon">
+      📄
+    </div>
+
+    <h2>
+      No Applications Yet
+    </h2>
+
+    <p>
+      Candidates have not applied for this job yet.
+    </p>
+
+    <button
+      type="button"
+      class="back-btn"
+      (click)="goBack()">
+
+      ← Back to My Jobs
+
+    </button>
+
+  </div>
+
+
+  <!-- Applications -->
+  <div
+    class="applications-list"
+    *ngIf="!isLoading && applications.length > 0">
+
+    <div
+      class="application-card"
+      *ngFor="let application of applications">
+
+
+      <!-- Candidate Header -->
+      <div class="application-header">
+
+        <div class="candidate-section">
+
+          <div class="candidate-avatar">
+
+            {{
+              (application.candidateName ?? 'Candidate')
+                .charAt(0)
+                .toUpperCase()
+            }}
+
+          </div>
+
+          <div>
+
+            <h2>
+
+              {{
+                application.candidateName ??
+                'Candidate'
+              }}
+
+            </h2>
+
+            <p class="candidate-email">
+
+              ✉
+
+              {{
+                application.candidateEmail ??
+                'Email not available'
+              }}
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- Current Status -->
+        <span
+          class="status-badge"
+          [ngClass]="getStatusClass(application.status)">
+
+          {{ getStatusName(application.status) }}
+
+        </span>
+
+      </div>
+
+
+      <!-- Application Information -->
+      <div class="application-info">
+
+        <div class="info-item">
+
+          <span class="info-label">
+            Job
+          </span>
+
+          <strong>
+            {{ application.jobTitle ?? 'Job' }}
+          </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+          <span class="info-label">
+            Applied On
+          </span>
+
+          <strong>
+            {{ application.appliedAt | date:'dd MMM yyyy, hh:mm a' }}
+          </strong>
+
+        </div>
+
+
+        <div
+          class="info-item"
+          *ngIf="application.updatedAt">
+
+          <span class="info-label">
+            Last Updated
+          </span>
+
+          <strong>
+            {{ application.updatedAt | date:'dd MMM yyyy, hh:mm a' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- Cover Letter -->
+      <div
+        class="cover-letter"
+        *ngIf="application.coverLetter">
+
+        <div class="section-title">
+
+          <span>
+            📝
+          </span>
+
+          <h3>
+            Cover Letter
+          </h3>
+
+        </div>
+
+        <p>
+          {{ application.coverLetter }}
+        </p>
+
+      </div>
+
+
+      <!-- Status Management -->
+      <div class="status-management">
+
+        <div>
+
+          <h3>
+            Application Status
+          </h3>
+
+          <p>
+            Update the candidate's application progress.
+          </p>
+
+        </div>
+
+
+        <div class="status-actions">
+
+          <!-- Applied -->
+          <button
+            type="button"
+            class="status-btn status-btn-applied"
+            [class.active]="application.status === 1"
+            [disabled]="updatingApplicationId === application.id"
+            (click)="updateStatus(application, 1)">
+
+            Applied
+
+          </button>
+
+
+          <!-- Shortlisted -->
+          <button
+            type="button"
+            class="status-btn status-btn-shortlisted"
+            [class.active]="application.status === 2"
+            [disabled]="updatingApplicationId === application.id"
+            (click)="updateStatus(application, 2)">
+
+            Shortlisted
+
+          </button>
+
+
+          <!-- Interview -->
+          <button
+            type="button"
+            class="status-btn status-btn-interview"
+            [class.active]="application.status === 3"
+            [disabled]="updatingApplicationId === application.id"
+            (click)="updateStatus(application, 3)">
+
+            Interview
+
+          </button>
+
+
+          <!-- Rejected -->
+          <button
+            type="button"
+            class="status-btn status-btn-rejected"
+            [class.active]="application.status === 4"
+            [disabled]="updatingApplicationId === application.id"
+            (click)="updateStatus(application, 4)">
+
+            Rejected
+
+          </button>
+
+
+          <!-- Hired -->
+          <button
+            type="button"
+            class="status-btn status-btn-hired"
+            [class.active]="application.status === 5"
+            [disabled]="updatingApplicationId === application.id"
+            (click)="updateStatus(application, 5)">
+
+            Hired
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- Updating Indicator -->
+      <div
+        class="updating-message"
+        *ngIf="updatingApplicationId === application.id">
+
+        Updating application status...
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Refresh -->
+  <div
+    class="bottom-actions"
+    *ngIf="!isLoading && applications.length > 0">
+
+    <button
+      type="button"
+      class="refresh-btn"
+      (click)="refreshApplications()"
+      [disabled]="isLoading">
+
+      ↻ Refresh Applications
+
+    </button>
+
+  </div>
+
+</div>
+
+  </main>
+
+</div>

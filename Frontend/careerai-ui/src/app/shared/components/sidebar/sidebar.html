@@ -1,0 +1,282 @@
+<aside class="sidebar">
+
+  <div class="sidebar-brand">
+
+    <div class="brand-logo">
+      C
+    </div>
+
+    <div class="brand-text">
+
+      <h2>
+        CareerAI
+      </h2>
+
+      <span>
+        Career Platform
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <nav class="sidebar-nav">
+
+
+    <!-- ========================= -->
+    <!-- RECRUITER NAVIGATION -->
+    <!-- ========================= -->
+
+    <ng-container *ngIf="isRecruiter">
+
+      <!-- Recruiter Dashboard -->
+
+      <a
+        routerLink="/recruiter/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          📊
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- My Jobs -->
+
+      <a
+        routerLink="/recruiter/jobs"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          💼
+        </span>
+
+        <span>
+          My Jobs
+        </span>
+
+      </a>
+
+
+    </ng-container>
+
+
+
+    <!-- ========================= -->
+    <!-- CANDIDATE NAVIGATION -->
+    <!-- ========================= -->
+
+    <ng-container *ngIf="isCandidate">
+
+
+      <!-- Dashboard -->
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          ⌂
+        </span>
+
+        <span>
+          Dashboard
+        </span>
+
+      </a>
+
+
+      <!-- My Profile -->
+
+      <a
+        routerLink="/profile"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          👤
+        </span>
+
+        <span>
+          My Profile
+        </span>
+
+      </a>
+
+
+      <!-- My Resume -->
+
+      <a
+        routerLink="/resume"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          📄
+        </span>
+
+        <span>
+          My Resume
+        </span>
+
+      </a>
+
+
+      <!-- Jobs -->
+
+      <a
+        routerLink="/jobs"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          💼
+        </span>
+
+        <span>
+          Jobs
+        </span>
+
+      </a>
+
+
+      <!-- Applications -->
+
+      <a
+        routerLink="/applications"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          📋
+        </span>
+
+        <span>
+          Applications
+        </span>
+
+      </a>
+
+
+      <!-- AI Career Chat -->
+
+      <a
+        routerLink="/ai-chat"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          🤖
+        </span>
+
+        <span>
+          AI Career Chat
+        </span>
+
+      </a>
+
+
+      <!-- AI Interview -->
+
+      <a
+        routerLink="/interview"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          🎯
+        </span>
+
+        <span>
+          AI Interview
+        </span>
+
+      </a>
+
+
+      <!-- Saved Jobs -->
+
+      <a
+        routerLink="/saved-jobs"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          🔖
+        </span>
+
+        <span>
+          Saved Jobs
+        </span>
+
+      </a>
+
+
+      <!-- Job Alerts -->
+
+      <a
+        routerLink="/job-alerts"
+        routerLinkActive="active"
+        class="nav-item"
+      >
+
+        <span class="nav-icon">
+          🔔
+        </span>
+
+        <span>
+          Job Alerts
+        </span>
+
+      </a>
+
+
+    </ng-container>
+
+  </nav>
+
+
+  <!-- Logout -->
+
+  <div class="sidebar-bottom">
+
+    <button
+      type="button"
+      class="logout-button"
+      (click)="logout()"
+    >
+
+      <span class="nav-icon">
+        ↪
+      </span>
+
+      <span>
+        Logout
+      </span>
+
+    </button>
+
+  </div>
+
+</aside>

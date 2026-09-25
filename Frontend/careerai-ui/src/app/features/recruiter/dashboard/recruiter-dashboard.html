@@ -1,0 +1,396 @@
+
+<app-sidebar></app-sidebar>
+
+<div class="dashboard-page">
+
+  <!-- Shared Navbar -->
+  <app-navbar></app-navbar>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content">
+
+    <!-- Dashboard Toolbar -->
+    <div class="dashboard-toolbar">
+
+      <div>
+        <span class="eyebrow">
+          CAREERAI RECRUITER
+        </span>
+
+        <p>
+          Here's what's happening with your recruitment today.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="refresh-btn"
+        (click)="refreshDashboard()"
+        [disabled]="isLoading"
+      >
+        ↻ Refresh
+      </button>
+
+    </div>
+
+    <!-- Error Message -->
+    <div
+      class="message error-message"
+      *ngIf="errorMessage"
+    >
+      ⚠ {{ errorMessage }}
+    </div>
+
+    <!-- Loading State -->
+    <div
+      class="loading-state"
+      *ngIf="isLoading"
+    >
+      <div class="spinner"></div>
+
+      <p>
+        Loading recruiter dashboard...
+      </p>
+    </div>
+
+    <!-- Dashboard Statistics -->
+    <div
+      *ngIf="!isLoading && dashboard"
+    >
+
+      <!-- Job Overview -->
+      <section class="dashboard-section">
+
+        <div class="section-heading">
+          <div>
+            <span class="section-eyebrow">
+              JOB OVERVIEW
+            </span>
+
+            <h2>
+              Your Jobs
+            </h2>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+
+          <!-- Total Jobs -->
+          <div class="stat-card">
+
+            <div class="stat-icon jobs-icon">
+              💼
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Total Jobs
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.totalJobs }}
+              </strong>
+
+              <span class="stat-description">
+                Jobs created by you
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Active Jobs -->
+          <div class="stat-card">
+
+            <div class="stat-icon active-icon">
+              ✓
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Active Jobs
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.activeJobs }}
+              </strong>
+
+              <span class="stat-description">
+                Accepting applications
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Total Applications -->
+          <div class="stat-card">
+
+            <div class="stat-icon applications-icon">
+              👥
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Total Applications
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.totalApplications }}
+              </strong>
+
+              <span class="stat-description">
+                Candidates applied
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Application Overview -->
+      <section class="dashboard-section">
+
+        <div class="section-heading">
+          <div>
+            <span class="section-eyebrow">
+              APPLICATION OVERVIEW
+            </span>
+
+            <h2>
+              Candidate Pipeline
+            </h2>
+          </div>
+        </div>
+
+        <div class="stats-grid application-stats">
+
+          <!-- Applied -->
+          <div class="stat-card">
+
+            <div class="stat-icon applied-icon">
+              📥
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Applied
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.appliedApplications }}
+              </strong>
+
+              <span class="stat-description">
+                New applications
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Shortlisted -->
+          <div class="stat-card">
+
+            <div class="stat-icon shortlisted-icon">
+              ⭐
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Shortlisted
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.shortlistedApplications }}
+              </strong>
+
+              <span class="stat-description">
+                Candidates shortlisted
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Interviews -->
+          <div class="stat-card">
+
+            <div class="stat-icon interview-icon">
+              🎯
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Interviews
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.interviewApplications }}
+              </strong>
+
+              <span class="stat-description">
+                Candidates in interview
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Hired -->
+          <div class="stat-card">
+
+            <div class="stat-icon hired-icon">
+              ✓
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Hired
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.hiredApplications }}
+              </strong>
+
+              <span class="stat-description">
+                Successful candidates
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Rejected -->
+          <div class="stat-card">
+
+            <div class="stat-icon rejected-icon">
+              ×
+            </div>
+
+            <div class="stat-content">
+              <span class="stat-label">
+                Rejected
+              </span>
+
+              <strong class="stat-value">
+                {{ dashboard.rejectedApplications }}
+              </strong>
+
+              <span class="stat-description">
+                Applications rejected
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Recruitment Pipeline -->
+      <section class="dashboard-section">
+
+        <div class="pipeline-card">
+
+          <div class="pipeline-header">
+
+            <span class="section-eyebrow">
+              RECRUITMENT PIPELINE
+            </span>
+
+            <h2>
+              Application Progress
+            </h2>
+
+            <p>
+              Overview of candidates at each stage
+              of your hiring process.
+            </p>
+
+          </div>
+
+          <div class="pipeline-list">
+
+            <!-- Applied -->
+            <div class="pipeline-item">
+
+              <div class="pipeline-info">
+                <span class="pipeline-dot applied-dot"></span>
+
+                <span>Applied</span>
+              </div>
+
+              <strong>
+                {{ dashboard.appliedApplications }}
+              </strong>
+
+            </div>
+
+            <!-- Shortlisted -->
+            <div class="pipeline-item">
+
+              <div class="pipeline-info">
+                <span class="pipeline-dot shortlisted-dot"></span>
+
+                <span>Shortlisted</span>
+              </div>
+
+              <strong>
+                {{ dashboard.shortlistedApplications }}
+              </strong>
+
+            </div>
+
+            <!-- Interview -->
+            <div class="pipeline-item">
+
+              <div class="pipeline-info">
+                <span class="pipeline-dot interview-dot"></span>
+
+                <span>Interview</span>
+              </div>
+
+              <strong>
+                {{ dashboard.interviewApplications }}
+              </strong>
+
+            </div>
+
+            <!-- Hired -->
+            <div class="pipeline-item">
+
+              <div class="pipeline-info">
+                <span class="pipeline-dot hired-dot"></span>
+
+                <span>Hired</span>
+              </div>
+
+              <strong>
+                {{ dashboard.hiredApplications }}
+              </strong>
+
+            </div>
+
+            <!-- Rejected -->
+            <div class="pipeline-item">
+
+              <div class="pipeline-info">
+                <span class="pipeline-dot rejected-dot"></span>
+
+                <span>Rejected</span>
+              </div>
+
+              <strong>
+                {{ dashboard.rejectedApplications }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+
+</div>
