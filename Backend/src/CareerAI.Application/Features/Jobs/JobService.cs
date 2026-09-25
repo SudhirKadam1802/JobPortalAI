@@ -1,4 +1,5 @@
-﻿using CareerAI.Application.Features.Jobs.DTOs;
+﻿
+using CareerAI.Application.Features.Jobs.DTOs;
 using CareerAI.Application.Interfaces;
 using CareerAI.Domain.Entities;
 
@@ -25,7 +26,6 @@ public class JobService : IJobService
         Guid userId,
         CreateJobRequest request)
     {
-        // Find Recruiter profile using logged-in User ID
         var recruiter = await _recruiterRepository
             .GetByUserIdAsync(userId);
 
@@ -35,7 +35,19 @@ public class JobService : IJobService
                 "Recruiter profile was not found.");
         }
 
-        // Basic validation
+        // Validate company name entered for this job
+        if (string.IsNullOrWhiteSpace(request.CompanyName))
+        {
+            throw new Exception(
+                "Company name is required.");
+        }
+
+        if (request.CompanyName.Trim().Length > 150)
+        {
+            throw new Exception(
+                "Company name cannot exceed 150 characters.");
+        }
+
         if (string.IsNullOrWhiteSpace(request.Title))
         {
             throw new Exception("Job title is required.");
@@ -66,14 +78,17 @@ public class JobService : IJobService
                 "Maximum salary cannot be less than minimum salary.");
         }
 
-        // Create Job
         var job = new Job
         {
             Id = Guid.NewGuid(),
 
-            // IMPORTANT:
-            // Job.RecruiterId expects Recruiter.Id
             RecruiterId = recruiter.Id,
+
+            // Company name belongs to this individual job
+            CompanyName = request.CompanyName.Trim(),
+
+            // Preserve existing recruiter relationship
+            Recruiter = recruiter,
 
             Title = request.Title.Trim(),
 
@@ -90,6 +105,8 @@ public class JobService : IJobService
             MinimumSalary = request.MinimumSalary,
 
             MaximumSalary = request.MaximumSalary,
+
+            RequiredEducation = request.RequiredEducation,
 
             ApplicationDeadline = request.ApplicationDeadline,
 
@@ -148,7 +165,6 @@ public class JobService : IJobService
             return null;
         }
 
-        // Find recruiter profile
         var recruiter = await _recruiterRepository
             .GetByUserIdAsync(userId);
 
@@ -158,14 +174,26 @@ public class JobService : IJobService
                 "Recruiter profile was not found.");
         }
 
-        // Check ownership
+        // Preserve existing ownership authorization
         if (job.RecruiterId != recruiter.Id)
         {
             throw new UnauthorizedAccessException(
                 "You are not authorized to update this job.");
         }
 
-        // Validation
+        // Validate company name during update
+        if (string.IsNullOrWhiteSpace(request.CompanyName))
+        {
+            throw new Exception(
+                "Company name is required.");
+        }
+
+        if (request.CompanyName.Trim().Length > 150)
+        {
+            throw new Exception(
+                "Company name cannot exceed 150 characters.");
+        }
+
         if (string.IsNullOrWhiteSpace(request.Title))
         {
             throw new Exception("Job title is required.");
@@ -196,7 +224,9 @@ public class JobService : IJobService
                 "Maximum salary cannot be less than minimum salary.");
         }
 
-        // Update
+        // Update company name stored on this job
+        job.CompanyName = request.CompanyName.Trim();
+
         job.Title = request.Title.Trim();
 
         job.Description = request.Description.Trim();
@@ -213,6 +243,8 @@ public class JobService : IJobService
 
         job.MaximumSalary = request.MaximumSalary;
 
+        job.RequiredEducation = request.RequiredEducation;
+
         job.ApplicationDeadline = request.ApplicationDeadline;
 
         job.UpdatedAt = DateTime.UtcNow;
@@ -221,7 +253,12 @@ public class JobService : IJobService
 
         await _jobRepository.SaveChangesAsync();
 
-        return MapToResponse(job);
+        // Reload job with related data
+        var updatedJob = await _jobRepository.GetByIdAsync(id);
+
+        return updatedJob is null
+            ? null
+            : MapToResponse(updatedJob);
     }
 
     // ========================================
@@ -239,7 +276,6 @@ public class JobService : IJobService
             return false;
         }
 
-        // Find recruiter profile
         var recruiter = await _recruiterRepository
             .GetByUserIdAsync(userId);
 
@@ -249,7 +285,7 @@ public class JobService : IJobService
                 "Recruiter profile was not found.");
         }
 
-        // Check ownership
+        // Preserve existing ownership authorization
         if (job.RecruiterId != recruiter.Id)
         {
             throw new UnauthorizedAccessException(
@@ -264,7 +300,7 @@ public class JobService : IJobService
     }
 
     // ========================================
-    // Entity → Response DTO
+    // Entity -> Response DTO
     // ========================================
 
     private static JobResponse MapToResponse(Job job)
@@ -274,6 +310,9 @@ public class JobService : IJobService
             Id = job.Id,
 
             RecruiterId = job.RecruiterId,
+
+            // Company name stored on the Job entity
+            CompanyName = job.CompanyName,
 
             Title = job.Title,
 
@@ -291,9 +330,26 @@ public class JobService : IJobService
 
             MaximumSalary = job.MaximumSalary,
 
+            RequiredEducation = job.RequiredEducation,
+
             ApplicationDeadline = job.ApplicationDeadline,
 
-            CreatedAt = job.CreatedAt
+            CreatedAt = job.CreatedAt,
+
+            UpdatedAt = job.UpdatedAt,
+
+            // Map existing job skills into response DTOs
+            JobSkills = job.JobSkills
+                .Where(js => js.Skill != null)
+                .Select(js => new JobSkillResponse
+                {
+                    JobId = js.JobId,
+
+                    SkillId = js.SkillId,
+
+                    SkillName = js.Skill.Name
+                })
+                .ToList()
         };
     }
 }

@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -16,7 +17,6 @@ export class JobService {
     private http: HttpClient
   ) {}
 
-
   // =========================================================
   // GET ALL JOBS
   // =========================================================
@@ -29,7 +29,6 @@ export class JobService {
 
   }
 
-
   // =========================================================
   // GET JOB BY ID
   // =========================================================
@@ -41,7 +40,6 @@ export class JobService {
     );
 
   }
-
 
   // =========================================================
   // CREATE JOB
@@ -57,7 +55,6 @@ export class JobService {
     );
 
   }
-
 
   // =========================================================
   // UPDATE JOB
@@ -75,7 +72,6 @@ export class JobService {
 
   }
 
-
   // =========================================================
   // DELETE JOB
   // =========================================================
@@ -92,12 +88,14 @@ export class JobService {
 
 }
 
-
 // =========================================================
 // CREATE JOB REQUEST
 // =========================================================
 
 export interface CreateJobRequest {
+
+  // NEW: Company name for this individual job
+  companyName: string;
 
   title: string;
 
@@ -121,12 +119,14 @@ export interface CreateJobRequest {
 
 }
 
-
 // =========================================================
 // UPDATE JOB REQUEST
 // =========================================================
 
 export interface UpdateJobRequest {
+
+  // NEW: Company name when updating a job
+  companyName: string;
 
   title: string;
 

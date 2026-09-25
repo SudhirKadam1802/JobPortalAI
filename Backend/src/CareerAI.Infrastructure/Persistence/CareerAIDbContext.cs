@@ -1,4 +1,5 @@
-﻿using CareerAI.Domain.Entities;
+﻿
+using CareerAI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using ApplicationEntity = CareerAI.Domain.Entities.Application;
 
@@ -15,8 +16,10 @@ public class CareerAIDbContext : DbContext
     // ========================================
     // DbSets
     // ========================================
+
     public DbSet<RagDocumentChunk> RagDocumentChunks
-    => Set<RagDocumentChunk>();
+        => Set<RagDocumentChunk>();
+
     public DbSet<User> Users =>
         Set<User>();
 
@@ -92,7 +95,6 @@ public class CareerAIDbContext : DbContext
     public DbSet<UserProfile> UserProfiles =>
         Set<UserProfile>();
 
-
     // ========================================
     // Model Configuration
     // ========================================
@@ -102,11 +104,16 @@ public class CareerAIDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-       modelBuilder.Entity<RagDocumentChunk>()
-    .HasOne(x => x.Resume)
-    .WithMany()
-    .HasForeignKey(x => x.ResumeId)
-    .OnDelete(DeleteBehavior.Cascade);
+        // ========================================
+        // RAG Document Chunk Relationships
+        // ========================================
+
+        modelBuilder.Entity<RagDocumentChunk>()
+            .HasOne(x => x.Resume)
+            .WithMany()
+            .HasForeignKey(x => x.ResumeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         // ========================================
         // Composite Keys
         // ========================================
@@ -125,7 +132,6 @@ public class CareerAIDbContext : DbContext
                 x.SkillId
             });
 
-
         // ========================================
         // JobSkill Relationships
         // ========================================
@@ -142,7 +148,6 @@ public class CareerAIDbContext : DbContext
             .HasForeignKey(x => x.SkillId)
             .OnDelete(DeleteBehavior.Cascade);
 
-
         // ========================================
         // CandidateSkill Relationships
         // ========================================
@@ -158,7 +163,6 @@ public class CareerAIDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.SkillId)
             .OnDelete(DeleteBehavior.Cascade);
-
 
         // ========================================
         // User Relationships
@@ -200,7 +204,6 @@ public class CareerAIDbContext : DbContext
             .HasForeignKey<UserProfile>(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-
         // ========================================
         // Job Relationships
         // ========================================
@@ -211,6 +214,14 @@ public class CareerAIDbContext : DbContext
             .HasForeignKey(x => x.RecruiterId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // ========================================
+        // NEW: Job Company Name Configuration
+        // ========================================
+
+        modelBuilder.Entity<Job>()
+            .Property(x => x.CompanyName)
+            .HasMaxLength(150)
+            .IsRequired();
 
         // ========================================
         // Resume Relationships
@@ -222,22 +233,15 @@ public class CareerAIDbContext : DbContext
             .HasForeignKey(x => x.CandidateId)
             .OnDelete(DeleteBehavior.Cascade);
 
-
         // ========================================
         // Education Relationships
         // ========================================
-        // IMPORTANT:
-        // WithMany(x => x.Educations) connects
-        // Candidate.Educations with Education.Candidate.
-        // This prevents EF Core from creating
-        // the unwanted CandidateId1 shadow property.
 
         modelBuilder.Entity<Education>()
             .HasOne(x => x.Candidate)
             .WithMany(x => x.Educations)
             .HasForeignKey(x => x.CandidateId)
             .OnDelete(DeleteBehavior.Cascade);
-
 
         // ========================================
         // Experience Relationships
@@ -249,7 +253,6 @@ public class CareerAIDbContext : DbContext
             .HasForeignKey(x => x.CandidateId)
             .OnDelete(DeleteBehavior.Cascade);
 
-
         // ========================================
         // Project Relationships
         // ========================================
@@ -259,7 +262,6 @@ public class CareerAIDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.CandidateId)
             .OnDelete(DeleteBehavior.Cascade);
-
 
         // ========================================
         // Application Relationships
@@ -276,7 +278,6 @@ public class CareerAIDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.JobId)
             .OnDelete(DeleteBehavior.Restrict);
-
 
         // ========================================
         // Resume Analysis Relationships
@@ -311,7 +312,6 @@ public class CareerAIDbContext : DbContext
                 x => x.InterviewQuestionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-
         // ========================================
         // AI Relationships
         // ========================================
@@ -321,7 +321,6 @@ public class CareerAIDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.ConversationId)
             .OnDelete(DeleteBehavior.Cascade);
-
 
         // ========================================
         // Saved Job Relationships
@@ -339,7 +338,6 @@ public class CareerAIDbContext : DbContext
             .HasForeignKey(x => x.JobId)
             .OnDelete(DeleteBehavior.Restrict);
 
-
         // ========================================
         // Job Application Note Relationships
         // ========================================
@@ -356,7 +354,6 @@ public class CareerAIDbContext : DbContext
             .HasForeignKey(x => x.RecruiterId)
             .OnDelete(DeleteBehavior.Restrict);
 
-
         // ========================================
         // Job Alert Relationships
         // ========================================
@@ -366,7 +363,6 @@ public class CareerAIDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.CandidateId)
             .OnDelete(DeleteBehavior.Cascade);
-
 
         // ========================================
         // Job Recommendation Relationships
@@ -383,7 +379,6 @@ public class CareerAIDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.JobId)
             .OnDelete(DeleteBehavior.Restrict);
-
 
         // ========================================
         // Decimal Precision
@@ -408,7 +403,6 @@ public class CareerAIDbContext : DbContext
         modelBuilder.Entity<JobRecommendation>()
             .Property(x => x.MatchScore)
             .HasPrecision(5, 2);
-
 
         // ========================================
         // Enum Conversions

@@ -1,3 +1,4 @@
+
 import {
   ChangeDetectorRef,
   Component,
@@ -9,15 +10,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 
-import {
-  Job
-} from '../../../../core/models/job.models';
+import { Job } from '../../../../core/models/job.models';
 
 import {
   JobService,
   CreateJobRequest,
   UpdateJobRequest
 } from '../../../../core/services/job.service';
+
 import { Sidebar } from '../../../../shared/components/sidebar/sidebar';
 import { Navbar } from '../../../../shared/components/navbar/navbar';
 
@@ -49,16 +49,29 @@ export class RecruiterJobs implements OnInit {
 
   editingJobId: string | null = null;
 
+  // ========================================
+  // Job Form Fields
+  // ========================================
+
+  companyName = '';
+
   title = '';
   description = '';
   location = '';
   employmentType = '';
+
   minimumExperience = 0;
   maximumExperience = 0;
+
   minimumSalary: number | null = null;
   maximumSalary: number | null = null;
+
   requiredEducation = '';
   applicationDeadline = '';
+
+  // ========================================
+  // Constructor
+  // ========================================
 
   constructor(
     private jobService: JobService,
@@ -66,9 +79,17 @@ export class RecruiterJobs implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+  // ========================================
+  // Initialize
+  // ========================================
+
   ngOnInit(): void {
     this.loadJobs();
   }
+
+  // ========================================
+  // Load Recruiter Jobs
+  // ========================================
 
   loadJobs(): void {
 
@@ -115,11 +136,16 @@ export class RecruiterJobs implements OnInit {
       });
   }
 
+  // ========================================
+  // Open Create Job Form
+  // ========================================
+
   openCreateForm(): void {
 
     this.resetForm();
 
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.isEditMode = false;
     this.isFormOpen = true;
@@ -127,41 +153,35 @@ export class RecruiterJobs implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // ========================================
+  // Open Edit Job Form
+  // ========================================
+
   openEditForm(job: Job): void {
 
     this.errorMessage = '';
+    this.successMessage = '';
 
     this.isEditMode = true;
     this.isFormOpen = true;
 
     this.editingJobId = job.id;
 
-    this.title =
-      job.title;
+    // Populate company name from the selected job
+    this.companyName = job.companyName ?? '';
 
-    this.description =
-      job.description;
+    this.title = job.title;
+    this.description = job.description;
+    this.location = job.location;
+    this.employmentType = job.employmentType;
 
-    this.location =
-      job.location;
+    this.minimumExperience = job.minimumExperience;
+    this.maximumExperience = job.maximumExperience;
 
-    this.employmentType =
-      job.employmentType;
+    this.minimumSalary = job.minimumSalary ?? null;
+    this.maximumSalary = job.maximumSalary ?? null;
 
-    this.minimumExperience =
-      job.minimumExperience;
-
-    this.maximumExperience =
-      job.maximumExperience;
-
-    this.minimumSalary =
-      job.minimumSalary ?? null;
-
-    this.maximumSalary =
-      job.maximumSalary ?? null;
-
-    this.requiredEducation =
-      job.requiredEducation ?? '';
+    this.requiredEducation = job.requiredEducation ?? '';
 
     this.applicationDeadline =
       job.applicationDeadline
@@ -170,6 +190,10 @@ export class RecruiterJobs implements OnInit {
 
     this.cdr.detectChanges();
   }
+
+  // ========================================
+  // Close Form
+  // ========================================
 
   closeForm(): void {
 
@@ -184,11 +208,33 @@ export class RecruiterJobs implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // ========================================
+  // Create / Update Job
+  // ========================================
+
   saveJob(): void {
 
     this.errorMessage = '';
     this.successMessage = '';
 
+    // Company Name Validation
+    if (!this.companyName.trim()) {
+
+      this.errorMessage =
+        'Company name is required.';
+
+      return;
+    }
+
+    if (this.companyName.trim().length > 150) {
+
+      this.errorMessage =
+        'Company name cannot exceed 150 characters.';
+
+      return;
+    }
+
+    // Job Title Validation
     if (!this.title.trim()) {
 
       this.errorMessage =
@@ -197,6 +243,7 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Description Validation
     if (!this.description.trim()) {
 
       this.errorMessage =
@@ -205,6 +252,7 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Location Validation
     if (!this.location.trim()) {
 
       this.errorMessage =
@@ -213,6 +261,7 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Employment Type Validation
     if (!this.employmentType.trim()) {
 
       this.errorMessage =
@@ -221,6 +270,7 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Experience Validation
     if (this.minimumExperience < 0) {
 
       this.errorMessage =
@@ -240,6 +290,7 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Minimum Salary Validation
     if (
       this.minimumSalary !== null &&
       this.minimumSalary < 0
@@ -251,6 +302,7 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Maximum Salary Validation
     if (
       this.maximumSalary !== null &&
       this.maximumSalary < 0
@@ -262,11 +314,11 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Salary Range Validation
     if (
       this.minimumSalary !== null &&
       this.maximumSalary !== null &&
-      this.maximumSalary <
-      this.minimumSalary
+      this.maximumSalary < this.minimumSalary
     ) {
 
       this.errorMessage =
@@ -275,6 +327,7 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // Application Deadline Validation
     if (!this.applicationDeadline) {
 
       this.errorMessage =
@@ -283,8 +336,15 @@ export class RecruiterJobs implements OnInit {
       return;
     }
 
+    // ========================================
+    // Prepare API Request
+    // ========================================
+
     const request:
       CreateJobRequest | UpdateJobRequest = {
+
+      companyName:
+        this.companyName.trim(),
 
       title:
         this.title.trim(),
@@ -321,6 +381,10 @@ export class RecruiterJobs implements OnInit {
 
     this.cdr.detectChanges();
 
+    // ========================================
+    // Update Existing Job
+    // ========================================
+
     if (
       this.isEditMode &&
       this.editingJobId
@@ -343,14 +407,11 @@ export class RecruiterJobs implements OnInit {
 
             const index =
               this.jobs.findIndex(
-                job =>
-                  job.id === response.id
+                job => job.id === response.id
               );
 
             if (index !== -1) {
-
-              this.jobs[index] =
-                response;
+              this.jobs[index] = response;
             }
 
             this.successMessage =
@@ -380,6 +441,10 @@ export class RecruiterJobs implements OnInit {
         });
 
     } else {
+
+      // ========================================
+      // Create New Job
+      // ========================================
 
       this.jobService
         .createJob(
@@ -428,6 +493,10 @@ export class RecruiterJobs implements OnInit {
     }
   }
 
+  // ========================================
+  // Delete Job
+  // ========================================
+
   deleteJob(job: Job): void {
 
     const confirmed =
@@ -460,8 +529,7 @@ export class RecruiterJobs implements OnInit {
 
           this.jobs =
             this.jobs.filter(
-              item =>
-                item.id !== job.id
+              item => item.id !== job.id
             );
 
           this.successMessage =
@@ -487,6 +555,10 @@ export class RecruiterJobs implements OnInit {
       });
   }
 
+  // ========================================
+  // View Applications
+  // ========================================
+
   viewApplications(jobId: string): void {
 
     this.router.navigate([
@@ -496,14 +568,23 @@ export class RecruiterJobs implements OnInit {
     ]);
   }
 
-  refreshJobs(): void {
+  // ========================================
+  // Refresh Jobs
+  // ========================================
 
+  refreshJobs(): void {
     this.loadJobs();
   }
+
+  // ========================================
+  // Reset Form
+  // ========================================
 
   resetForm(): void {
 
     this.editingJobId = null;
+
+    this.companyName = '';
 
     this.title = '';
     this.description = '';

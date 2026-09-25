@@ -1,17 +1,27 @@
+
 export interface Job {
+
   id: string;
+
   recruiterId: string;
 
+  // Company name stored in the Jobs table
+  companyName: string;
+
   title: string;
+
   description: string;
+
   location: string;
 
   employmentType: string;
 
   minimumExperience: number;
+
   maximumExperience: number;
 
   minimumSalary?: number | null;
+
   maximumSalary?: number | null;
 
   requiredEducation?: string | null;
@@ -19,15 +29,19 @@ export interface Job {
   applicationDeadline: string;
 
   createdAt: string;
+
   updatedAt?: string | null;
 
   recruiter?: Recruiter;
+
   jobSkills?: JobSkill[];
+
 }
 
-
 export interface Recruiter {
+
   id: string;
+
   userId: string;
 
   companyName: string;
@@ -37,10 +51,11 @@ export interface Recruiter {
   companyWebsite?: string | null;
 
   location?: string | null;
+
 }
 
-
 export interface JobSkill {
+
   id: string;
 
   jobId: string;
@@ -48,11 +63,13 @@ export interface JobSkill {
   skillId: string;
 
   skill?: Skill;
+
 }
 
-
 export interface Skill {
+
   id: string;
 
   name: string;
+
 }

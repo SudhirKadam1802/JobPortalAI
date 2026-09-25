@@ -6,6 +6,9 @@ public class Job
 
     public Guid RecruiterId { get; set; }
 
+    // NEW: Company name for this individual job
+    public string CompanyName { get; set; } = string.Empty;
+
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;

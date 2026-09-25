@@ -2,6 +2,8 @@
 
 public class CreateJobRequest
 {
+    public string CompanyName { get; set; } = string.Empty;
+
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
@@ -17,6 +19,8 @@ public class CreateJobRequest
     public decimal? MinimumSalary { get; set; }
 
     public decimal? MaximumSalary { get; set; }
+
+    public string? RequiredEducation { get; set; }
 
     public DateTime ApplicationDeadline { get; set; }
 }
