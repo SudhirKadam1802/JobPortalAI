@@ -140,87 +140,95 @@ export class AiChat implements OnInit {
   }
 
   // ========================================
-  // Delete Conversation
-  // ========================================
+// Delete Conversation
+// ========================================
 
-  deleteConversation(
-    conversation: AIConversation
-  ): void {
+deleteConversation(
+  conversation: AIConversation
+): void {
 
-    if (this.isDeleting || this.isSending) {
-      return;
-    }
+  if (this.isDeleting || this.isSending) {
+    return;
+  }
 
-    const confirmed = confirm(
-      `Are you sure you want to delete "${conversation.title}"?`
-    );
+  const confirmed = confirm(
+    `Are you sure you want to delete "${conversation.title}"?`
+  );
 
-    if (!confirmed) {
-      return;
-    }
+  if (!confirmed) {
+    return;
+  }
 
-    this.isDeleting = true;
+  this.isDeleting = true;
+  this.deletingConversationId = conversation.id;
 
-    this.deletingConversationId = conversation.id;
+  this.errorMessage = '';
+  this.successMessage = '';
 
-    this.errorMessage = '';
-    this.successMessage = '';
+  this.aiChatService
+    .deleteConversation(conversation.id)
+    .subscribe({
 
-    this.aiChatService
-      .deleteConversation(conversation.id)
-      .subscribe({
+      next: () => {
 
-        next: () => {
+        // Remove the conversation from history
+        this.conversations = this.conversations.filter(
+          item => item.id !== conversation.id
+        );
 
-          // Remove the conversation from history
-          this.conversations = this.conversations.filter(
-            item => item.id !== conversation.id
-          );
+        // If the deleted conversation was selected,
+        // select the next available conversation
+        if (
+          this.selectedConversation?.id === conversation.id
+        ) {
 
-          // If the deleted conversation was selected,
-          // select the next available conversation
-          if (
-            this.selectedConversation?.id === conversation.id
-          ) {
-
-            this.selectedConversation =
-              this.conversations[0] ?? null;
-
-          }
-
-          // Clear cached Markdown for deleted messages
-          conversation.messages.forEach(message => {
-            this.markdownCache.delete(message.id);
-          });
-
-          this.successMessage =
-            'Conversation deleted successfully.';
-
-          this.isDeleting = false;
-
-          this.deletingConversationId = null;
-
-          this.cdr.detectChanges();
-
-        },
-
-        error: (error) => {
-
-          this.errorMessage =
-            error?.error?.message ??
-            'Unable to delete this conversation.';
-
-          this.isDeleting = false;
-
-          this.deletingConversationId = null;
-
-          this.cdr.detectChanges();
+          this.selectedConversation =
+            this.conversations[0] ?? null;
 
         }
 
-      });
+        // Clear cached Markdown for deleted messages
+        conversation.messages.forEach(message => {
+          this.markdownCache.delete(message.id);
+        });
 
-  }
+        // Show success message
+        this.successMessage =
+          'Conversation deleted successfully.';
+
+        this.isDeleting = false;
+        this.deletingConversationId = null;
+
+        // Immediately update the Angular view
+        this.cdr.detectChanges();
+
+        // Automatically remove the success message after 3 seconds
+        window.setTimeout(() => {
+
+          this.successMessage = '';
+
+          this.cdr.detectChanges();
+
+        }, 1000);
+
+      },
+
+      error: (error) => {
+
+        this.errorMessage =
+          error?.error?.message ??
+          'Unable to delete this conversation.';
+
+        this.isDeleting = false;
+        this.deletingConversationId = null;
+
+        this.cdr.detectChanges();
+
+      }
+
+    });
+
+}
 
   // ========================================
   // Create Conversation
