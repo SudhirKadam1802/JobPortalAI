@@ -21,3 +21,5 @@ Backend/src/CareerAI.API/wwwroot/resumes/
 
 # Logs
 *.log
+# Old SQL Server EF Core migrations backup
+Backend/Migrations_SQLServer_Backup/

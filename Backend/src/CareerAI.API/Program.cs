@@ -31,7 +31,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================================
 
 builder.Services.AddDbContext<CareerAIDbContext>(options =>
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ========================================
@@ -66,7 +66,6 @@ builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IResumeService, ResumeService>();
 builder.Services.AddScoped<IJobRecommendationService,JobRecommendationService>();
 builder.Services.AddScoped<IAIChatService, AIChatService>();
-builder.Services.AddScoped<IAIInterviewRepository, AIInterviewRepository>();
 builder.Services.AddScoped<IAIInterviewRepository, AIInterviewRepository>();
 builder.Services.AddScoped<IAIInterviewService, AIInterviewService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
@@ -170,24 +169,25 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
+var allowedOrigin = builder.Configuration["AllowedOrigin"]
+                    ?? "http://localhost:4200";
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy
-            .WithOrigins("http://localhost:4200")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins(allowedOrigin)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
+
 // ========================================
 // Build Application
 // ========================================
 
 var app = builder.Build();
-
-app.UseCors("AllowAngular");
 
 // ========================================
 // HTTP Request Pipeline
@@ -200,6 +200,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAngular");
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthentication();
