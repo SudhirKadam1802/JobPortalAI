@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -9,8 +10,7 @@ import { Resume } from '../models/resume.models';
 })
 export class ResumeService {
 
-  private readonly apiUrl =
-    'https://localhost:7184/api/Resume';
+  private readonly apiUrl = `${environment.apiUrl}/Resume`;
 
   constructor(
     private http: HttpClient

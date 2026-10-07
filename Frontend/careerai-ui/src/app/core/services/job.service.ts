@@ -1,4 +1,4 @@
-
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -11,7 +11,7 @@ import { Job } from '../models/job.models';
 export class JobService {
 
   private readonly apiUrl =
-    'https://localhost:7184/api/Job';
+    `${environment.apiUrl}/Job`;
 
   constructor(
     private http: HttpClient

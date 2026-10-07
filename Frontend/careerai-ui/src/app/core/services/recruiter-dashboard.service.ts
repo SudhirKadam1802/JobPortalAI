@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -9,8 +10,7 @@ import { RecruiterDashboard } from '../models/recruiter-dashboard.models';
 })
 export class RecruiterDashboardService {
 
-  private readonly apiUrl =
-    'https://localhost:7184/api/RecruiterDashboard';
+private readonly apiUrl = `${environment.apiUrl}/RecruiterDashboard`;
 
   constructor(
     private http: HttpClient

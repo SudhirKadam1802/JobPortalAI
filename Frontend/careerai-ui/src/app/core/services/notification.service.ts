@@ -1,4 +1,4 @@
-
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -9,8 +9,7 @@ import { Notification } from '../models/notification.models';
 })
 export class NotificationService {
 
-  private apiUrl = 'https://localhost:7184/api/Notification';
-
+private apiUrl = `${environment.apiUrl}/Notification`;
   constructor(private http: HttpClient) {}
 
   // Get all notifications for the logged-in user

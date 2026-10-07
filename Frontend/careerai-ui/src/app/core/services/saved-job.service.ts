@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -11,8 +12,7 @@ import {
 })
 export class SavedJobService {
 
-  private readonly apiUrl = 'https://localhost:7184/api/SavedJob';
-
+private readonly apiUrl = `${environment.apiUrl}/SavedJob`;
   constructor(private http: HttpClient) {}
 
   saveJob(jobId: string): Observable<SavedJob> {

@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -14,8 +15,7 @@ import {
   providedIn: 'root'
 })
 export class AIInterviewService {
-  private readonly apiUrl = 'https://localhost:7184/api/AIInterview';
-
+private readonly apiUrl = `${environment.apiUrl}/AIInterview`;
   constructor(private http: HttpClient) {}
 
   startInterview(

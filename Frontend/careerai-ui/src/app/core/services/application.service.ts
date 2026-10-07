@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 
 import {
@@ -24,7 +25,7 @@ export class ApplicationService {
   // =========================================================
 
   private readonly apiUrl =
-    'https://localhost:7184/api/Application';
+    `${environment.apiUrl}/Application`;
 
 
   // =========================================================

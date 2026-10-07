@@ -1,4 +1,4 @@
-
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -14,8 +14,7 @@ import {
   providedIn: 'root'
 })
 export class AIChatService {
-  private readonly apiUrl = 'https://localhost:7184/api/AIChat';
-
+private readonly apiUrl = `${environment.apiUrl}/AIChat`;
   constructor(private http: HttpClient) {}
 
   getConversations(): Observable<AIConversation[]> {

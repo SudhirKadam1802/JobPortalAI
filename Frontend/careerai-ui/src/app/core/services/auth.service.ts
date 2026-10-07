@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
@@ -14,7 +15,7 @@ import {
 export class AuthService {
 
   private readonly apiUrl =
-    'https://localhost:7184/api/Auth';
+    `${environment.apiUrl}/Auth`;
 
   constructor(
     private http: HttpClient
