@@ -1,4 +1,5 @@
 ﻿using CareerAI.Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
 namespace CareerAI.Infrastructure.AI;
@@ -6,10 +7,14 @@ namespace CareerAI.Infrastructure.AI;
 public class OllamaEmbeddingService : IEmbeddingService
 {
     private readonly HttpClient _httpClient;
+    private readonly IConfiguration _configuration;
 
-    public OllamaEmbeddingService(HttpClient httpClient)
+    public OllamaEmbeddingService(
+        HttpClient httpClient,
+        IConfiguration configuration)
     {
         _httpClient = httpClient;
+        _configuration = configuration;
     }
 
     public async Task<List<float>> GenerateEmbeddingAsync(string text)
@@ -20,9 +25,13 @@ public class OllamaEmbeddingService : IEmbeddingService
                 "Text cannot be empty.");
         }
 
+        var model = _configuration["Ollama:EmbeddingModel"]
+            ?? throw new InvalidOperationException(
+                "Ollama embedding model is missing.");
+
         var request = new
         {
-            model = "embeddinggemma",
+            model = model,
             input = text
         };
 

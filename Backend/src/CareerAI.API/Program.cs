@@ -68,8 +68,8 @@ builder.Services.AddScoped<IJobRecommendationService,JobRecommendationService>()
 builder.Services.AddScoped<IAIChatService, AIChatService>();
 builder.Services.AddScoped<IAIInterviewRepository, AIInterviewRepository>();
 builder.Services.AddScoped<IAIInterviewService, AIInterviewService>();
-builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
-builder.Services.AddScoped<IResumeTextExtractor, PdfResumeTextExtractor>();
+builder.Services.AddScoped<IFileStorageService,SupabaseFileStorageService>();
+builder.Services.AddScoped<IResumeTextExtractor,PdfResumeTextExtractor>();
 
 
 // ========================================
@@ -82,18 +82,20 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+var ollamaBaseUrl = builder.Configuration["Ollama:BaseUrl"]
+    ?? throw new InvalidOperationException("Ollama BaseUrl is missing.");
+
 builder.Services.AddHttpClient<IOllamaService, OllamaService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:11434/");
+    client.BaseAddress = new Uri(ollamaBaseUrl);
     client.Timeout = TimeSpan.FromMinutes(5);
 });
 
 builder.Services.AddHttpClient<IEmbeddingService, OllamaEmbeddingService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:11434/");
+    client.BaseAddress = new Uri(ollamaBaseUrl);
     client.Timeout = TimeSpan.FromMinutes(5);
 });
-
 // ========================================
 // JWT Authentication
 // ========================================
