@@ -78,8 +78,9 @@ public class CandidateProfileService
                 ? null
                 : request.Bio.Trim();
 
+        // Convert DateOfBirth to UTC before saving to PostgreSQL.
         candidate.DateOfBirth =
-            request.DateOfBirth;
+            ToUtcNullable(request.DateOfBirth);
 
         candidate.User.UpdatedAt =
             DateTime.UtcNow;
@@ -88,6 +89,37 @@ public class CandidateProfileService
             .UpdateAsync(candidate);
 
         return MapToResponse(candidate);
+    }
+
+    // ========================================
+    // Convert DateTime? to UTC
+    // ========================================
+
+    private static DateTime? ToUtcNullable(DateTime? value)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        var date = value.Value;
+
+        if (date.Kind == DateTimeKind.Utc)
+        {
+            return date;
+        }
+
+        if (date.Kind == DateTimeKind.Local)
+        {
+            return date.ToUniversalTime();
+        }
+
+        // Angular date-only values normally arrive as
+        // DateTimeKind.Unspecified.
+        // Treat the date as UTC midnight.
+        return DateTime.SpecifyKind(
+            date,
+            DateTimeKind.Utc);
     }
 
     private static CandidateProfileResponse
