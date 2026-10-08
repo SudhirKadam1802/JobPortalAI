@@ -1,5 +1,4 @@
-﻿
-using CareerAI.Application.Features.Jobs.DTOs;
+﻿using CareerAI.Application.Features.Jobs.DTOs;
 using CareerAI.Application.Interfaces;
 using CareerAI.Domain.Entities;
 
@@ -108,8 +107,10 @@ public class JobService : IJobService
 
             RequiredEducation = request.RequiredEducation,
 
-            ApplicationDeadline = request.ApplicationDeadline,
+            // Convert incoming date to UTC for PostgreSQL
+            ApplicationDeadline = ToUtc(request.ApplicationDeadline),
 
+            // Always store creation time as UTC
             CreatedAt = DateTime.UtcNow
         };
 
@@ -245,8 +246,11 @@ public class JobService : IJobService
 
         job.RequiredEducation = request.RequiredEducation;
 
-        job.ApplicationDeadline = request.ApplicationDeadline;
+        // Convert incoming date to UTC for PostgreSQL
+        job.ApplicationDeadline =
+            ToUtc(request.ApplicationDeadline);
 
+        // Always store update time as UTC
         job.UpdatedAt = DateTime.UtcNow;
 
         _jobRepository.Update(job);
@@ -297,6 +301,30 @@ public class JobService : IJobService
         await _jobRepository.SaveChangesAsync();
 
         return true;
+    }
+
+    // ========================================
+    // Convert DateTime to UTC
+    // ========================================
+
+    private static DateTime ToUtc(DateTime value)
+    {
+        if (value.Kind == DateTimeKind.Utc)
+        {
+            return value;
+        }
+
+        if (value.Kind == DateTimeKind.Local)
+        {
+            return value.ToUniversalTime();
+        }
+
+        // Date-only values from the Angular form arrive
+        // as DateTimeKind.Unspecified.
+        // Treat them as UTC midnight.
+        return DateTime.SpecifyKind(
+            value,
+            DateTimeKind.Utc);
     }
 
     // ========================================
