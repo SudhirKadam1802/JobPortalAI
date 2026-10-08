@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://YOUR-BACKEND-URL.onrender.com/api'
+    apiUrl: 'https://jobportalai-8i61.onrender.com/api'
 };
