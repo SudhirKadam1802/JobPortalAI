@@ -1,7 +1,9 @@
 ﻿
 using CareerAI.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace CareerAI.Infrastructure.AI;
 
@@ -24,9 +26,59 @@ public class OllamaService : IOllamaService
             ?? throw new InvalidOperationException(
                 "Gemini API key is missing.");
 
-        var model = _configuration["Gemini:Model"]
+        var primaryModel = _configuration["Gemini:Model"]
             ?? "gemini-2.5-flash";
 
+        var fallbackModel = _configuration["Gemini:FallbackModel"];
+
+        try
+        {
+            return await GenerateWithRetryAsync(
+                prompt, apiKey, primaryModel);
+        }
+        catch (HttpRequestException ex)
+            when (IsTemporaryFailure(ex) &&
+                  !string.IsNullOrWhiteSpace(fallbackModel) &&
+                  !string.Equals(
+                      primaryModel,
+                      fallbackModel,
+                      StringComparison.OrdinalIgnoreCase))
+        {
+            // The primary model is temporarily unavailable.
+            // Try the configured fallback model.
+            return await GenerateWithRetryAsync(
+                prompt, apiKey, fallbackModel);
+        }
+    }
+
+    private async Task<string> GenerateWithRetryAsync(
+        string prompt,
+        string apiKey,
+        string model)
+    {
+        for (var attempt = 1; attempt <= 2; attempt++)
+        {
+            try
+            {
+                return await GenerateOnceAsync(
+                    prompt, apiKey, model);
+            }
+            catch (HttpRequestException ex)
+                when (attempt == 1 && IsTemporaryFailure(ex))
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Gemini generation failed for model '{model}'.");
+    }
+
+    private async Task<string> GenerateOnceAsync(
+        string prompt,
+        string apiKey,
+        string model)
+    {
         var requestBody = new
         {
             contents = new[]
@@ -60,18 +112,40 @@ public class OllamaService : IOllamaService
             var error = await response.Content.ReadAsStringAsync();
 
             throw new HttpRequestException(
-                $"Gemini API returned {(int)response.StatusCode}: {error}");
+                $"Gemini API returned {(int)response.StatusCode} " +
+                $"for model '{model}': {error}",
+                null,
+                response.StatusCode);
         }
 
         var result =
             await response.Content.ReadFromJsonAsync<GeminiResponse>();
 
-        return result?.Candidates?
+        var text = result?.Candidates?
             .FirstOrDefault()?
             .Content?
             .Parts?
             .FirstOrDefault()?
-            .Text ?? string.Empty;
+            .Text;
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new InvalidOperationException(
+                $"Gemini returned no text for model '{model}'.");
+        }
+
+        return text;
+    }
+
+    private static bool IsTemporaryFailure(
+        HttpRequestException exception)
+    {
+        return exception.StatusCode is
+            HttpStatusCode.TooManyRequests or
+            HttpStatusCode.InternalServerError or
+            HttpStatusCode.BadGateway or
+            HttpStatusCode.ServiceUnavailable or
+            HttpStatusCode.GatewayTimeout;
     }
 
     private sealed class GeminiResponse
