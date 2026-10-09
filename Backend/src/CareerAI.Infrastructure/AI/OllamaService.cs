@@ -1,4 +1,5 @@
-﻿using CareerAI.Application.Interfaces;
+﻿
+using CareerAI.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
@@ -19,37 +20,77 @@ public class OllamaService : IOllamaService
 
     public async Task<string> GenerateAsync(string prompt)
     {
-        var model = _configuration["Ollama:GenerationModel"]
+        var apiKey = _configuration["Gemini:ApiKey"]
             ?? throw new InvalidOperationException(
-                "Ollama generation model is missing.");
+                "Gemini API key is missing.");
 
-        var request = new
+        var model = _configuration["Gemini:Model"]
+            ?? "gemini-2.5-flash";
+
+        var requestBody = new
         {
-            model = model,
-            prompt = prompt,
-            stream = false,
-            think = false,
-            options = new
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = prompt }
+                    }
+                }
+            },
+            generationConfig = new
             {
                 temperature = 0.2,
-                num_predict = 500
+                maxOutputTokens = 500
             }
         };
 
-        var response = await _httpClient.PostAsJsonAsync(
-            "api/generate",
-            request);
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent");
 
-        response.EnsureSuccessStatusCode();
+        request.Headers.Add("x-goog-api-key", apiKey);
+        request.Content = JsonContent.Create(requestBody);
+
+        using var response = await _httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+
+            throw new HttpRequestException(
+                $"Gemini API returned {(int)response.StatusCode}: {error}");
+        }
 
         var result =
-            await response.Content.ReadFromJsonAsync<OllamaResponse>();
+            await response.Content.ReadFromJsonAsync<GeminiResponse>();
 
-        return result?.Response ?? string.Empty;
+        return result?.Candidates?
+            .FirstOrDefault()?
+            .Content?
+            .Parts?
+            .FirstOrDefault()?
+            .Text ?? string.Empty;
     }
 
-    private class OllamaResponse
+    private sealed class GeminiResponse
     {
-        public string Response { get; set; } = string.Empty;
+        public List<GeminiCandidate>? Candidates { get; set; }
+    }
+
+    private sealed class GeminiCandidate
+    {
+        public GeminiContent? Content { get; set; }
+    }
+
+    private sealed class GeminiContent
+    {
+        public List<GeminiPart>? Parts { get; set; }
+    }
+
+    private sealed class GeminiPart
+    {
+        public string? Text { get; set; }
     }
 }
