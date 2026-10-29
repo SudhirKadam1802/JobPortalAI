@@ -76,9 +76,10 @@ export class AiInterview {
         this.cdr.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message ??
-          'Unable to start the AI interview. Check that Ollama is available.';
+        this.errorMessage = error?.name === 'TimeoutError'
+          ? 'Preparing the interview is taking longer than expected. Please try again.'
+          : error?.error?.message ??
+            'Unable to start the AI interview. Please try again.';
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -115,9 +116,10 @@ export class AiInterview {
         }
       },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message ??
-          'Unable to evaluate this answer. Please try again.';
+        this.errorMessage = error?.name === 'TimeoutError'
+          ? 'Evaluating the answer is taking longer than expected. Please try again.'
+          : error?.error?.message ??
+            'Unable to evaluate this answer. Please try again.';
         this.isSubmitting = false;
         this.cdr.detectChanges();
       }
@@ -159,9 +161,10 @@ export class AiInterview {
         this.cdr.detectChanges();
       },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message ??
-          'Interview completed, but the final result could not be loaded.';
+        this.errorMessage = error?.name === 'TimeoutError'
+          ? 'Loading the interview result is taking too long. Please try again.'
+          : error?.error?.message ??
+            'Interview completed, but the final result could not be loaded.';
         this.isSubmitting = false;
         this.cdr.detectChanges();
       }

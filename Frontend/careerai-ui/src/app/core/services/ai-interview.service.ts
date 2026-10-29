@@ -10,6 +10,7 @@ import {
   SubmitAnswerRequest,
   SubmitAnswerResponse
 } from '../models/ai-interview.models';
+import { timeout } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,7 @@ private readonly apiUrl = `${environment.apiUrl}/AIInterview`;
     return this.http.post<StartInterviewResponse>(
       `${this.apiUrl}/start`,
       request
-    );
+    ).pipe(timeout({ first: 150_000 }));
   }
 
   submitAnswer(
@@ -34,12 +35,12 @@ private readonly apiUrl = `${environment.apiUrl}/AIInterview`;
     return this.http.post<SubmitAnswerResponse>(
       `${this.apiUrl}/${interviewId}/answer`,
       request
-    );
+    ).pipe(timeout({ first: 150_000 }));
   }
 
   getResult(interviewId: string): Observable<InterviewResultResponse> {
     return this.http.get<InterviewResultResponse>(
       `${this.apiUrl}/${interviewId}/result`
-    );
+    ).pipe(timeout({ first: 150_000 }));
   }
 }

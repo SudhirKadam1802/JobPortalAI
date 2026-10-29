@@ -1,7 +1,7 @@
 import { environment } from '../../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 
 import { Resume } from '../models/resume.models';
 
@@ -47,7 +47,7 @@ export class ResumeService {
     return this.http.post<any>(
       `${this.apiUrl}/${id}/analyze`,
       {}
-    );
+    ).pipe(timeout({ first: 150_000 }));
   }
 
   getResumeAnalysis(id: string): Observable<any> {

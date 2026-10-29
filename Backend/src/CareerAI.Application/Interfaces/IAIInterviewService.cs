@@ -6,12 +6,14 @@ public interface IAIInterviewService
 {
     Task<StartInterviewResponse> StartInterviewAsync(
         Guid userId,
-        StartInterviewRequest request);
+        StartInterviewRequest request,
+        CancellationToken cancellationToken = default);
 
     Task<SubmitAnswerResponse> SubmitAnswerAsync(
         Guid userId,
         Guid interviewId,
-        SubmitAnswerRequest request);
+        SubmitAnswerRequest request,
+        CancellationToken cancellationToken = default);
 
     Task<InterviewResultResponse?> GetInterviewResultAsync(
         Guid userId,

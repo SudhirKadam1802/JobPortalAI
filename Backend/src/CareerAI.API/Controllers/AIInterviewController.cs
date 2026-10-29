@@ -21,7 +21,8 @@ public class AIInterviewController : ControllerBase
 
     [HttpPost("start")]
     public async Task<IActionResult> StartInterview(
-        [FromBody] StartInterviewRequest request)
+        [FromBody] StartInterviewRequest request,
+        CancellationToken cancellationToken)
     {
         var userId = GetUserId();
 
@@ -29,7 +30,8 @@ public class AIInterviewController : ControllerBase
             await _interviewService
                 .StartInterviewAsync(
                     userId,
-                    request);
+                    request,
+                    cancellationToken);
 
         return Ok(response);
     }
@@ -37,7 +39,8 @@ public class AIInterviewController : ControllerBase
     [HttpPost("{interviewId:guid}/answer")]
     public async Task<IActionResult> SubmitAnswer(
         Guid interviewId,
-        [FromBody] SubmitAnswerRequest request)
+        [FromBody] SubmitAnswerRequest request,
+        CancellationToken cancellationToken)
     {
         var userId = GetUserId();
 
@@ -46,7 +49,8 @@ public class AIInterviewController : ControllerBase
                 .SubmitAnswerAsync(
                     userId,
                     interviewId,
-                    request);
+                    request,
+                    cancellationToken);
 
         return Ok(response);
     }

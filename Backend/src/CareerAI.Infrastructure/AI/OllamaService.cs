@@ -9,6 +9,11 @@ namespace CareerAI.Infrastructure.AI;
 
 public class OllamaService : IOllamaService
 {
+    private static readonly TimeSpan QuickGenerationTimeout =
+        TimeSpan.FromSeconds(45);
+    private static readonly TimeSpan LocalGenerationTimeout =
+        TimeSpan.FromMinutes(2);
+
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
 
@@ -22,9 +27,56 @@ public class OllamaService : IOllamaService
 
     public async Task<string> GenerateAsync(string prompt)
     {
-        var apiKey = _configuration["Gemini:ApiKey"]
-            ?? throw new InvalidOperationException(
-                "Gemini API key is missing.");
+        return await GenerateAsync(
+            prompt,
+            CancellationToken.None,
+            lowLatency: false);
+    }
+
+    public async Task<string> GenerateQuickAsync(
+        string prompt,
+        CancellationToken cancellationToken = default)
+    {
+        using var timeoutCts =
+            CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken);
+        var generationTimeout =
+            string.IsNullOrWhiteSpace(
+                _configuration["Gemini:ApiKey"])
+                ? LocalGenerationTimeout
+                : QuickGenerationTimeout;
+        timeoutCts.CancelAfter(generationTimeout);
+
+        try
+        {
+            return await GenerateAsync(
+                prompt,
+                timeoutCts.Token,
+                lowLatency: true);
+        }
+        catch (OperationCanceledException exception)
+            when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"AI generation exceeded the {generationTimeout.TotalSeconds:0}-second time limit.",
+                exception);
+        }
+    }
+
+    private async Task<string> GenerateAsync(
+        string prompt,
+        CancellationToken cancellationToken,
+        bool lowLatency)
+    {
+        var apiKey = _configuration["Gemini:ApiKey"];
+
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            return await GenerateWithOllamaAsync(
+                prompt,
+                cancellationToken,
+                lowLatency);
+        }
 
         var primaryModel = _configuration["Gemini:Model"]
             ?? "gemini-2.5-flash";
@@ -34,7 +86,11 @@ public class OllamaService : IOllamaService
         try
         {
             return await GenerateWithRetryAsync(
-                prompt, apiKey, primaryModel);
+                prompt,
+                apiKey,
+                primaryModel,
+                cancellationToken,
+                lowLatency);
         }
         catch (HttpRequestException ex)
             when (IsTemporaryFailure(ex) &&
@@ -47,26 +103,93 @@ public class OllamaService : IOllamaService
             // The primary model is temporarily unavailable.
             // Try the configured fallback model.
             return await GenerateWithRetryAsync(
-                prompt, apiKey, fallbackModel);
+                prompt,
+                apiKey,
+                fallbackModel,
+                cancellationToken,
+                lowLatency);
         }
+    }
+
+    private async Task<string> GenerateWithOllamaAsync(
+        string prompt,
+        CancellationToken cancellationToken,
+        bool lowLatency)
+    {
+        var model = _configuration["Ollama:GenerationModel"]
+            ?? throw new InvalidOperationException(
+                "Gemini API key and Ollama generation model are missing.");
+
+        var requestBody = new Dictionary<string, object>
+        {
+            ["model"] = model,
+            ["prompt"] = prompt,
+            ["stream"] = false
+        };
+
+        if (lowLatency)
+        {
+            requestBody["think"] = false;
+            requestBody["options"] = new
+            {
+                temperature = 0.2,
+                num_predict = 500
+            };
+        }
+
+        using var response = await _httpClient.PostAsJsonAsync(
+            "api/generate",
+            requestBody,
+            cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var error = await response.Content.ReadAsStringAsync(
+                cancellationToken);
+
+            throw new HttpRequestException(
+                $"Ollama returned {(int)response.StatusCode}: {error}",
+                null,
+                response.StatusCode);
+        }
+
+        var result =
+            await response.Content.ReadFromJsonAsync<OllamaResponse>(
+                cancellationToken: cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(result?.Response))
+        {
+            throw new InvalidOperationException(
+                $"Ollama returned no text for model '{model}'.");
+        }
+
+        return result.Response;
     }
 
     private async Task<string> GenerateWithRetryAsync(
         string prompt,
         string apiKey,
-        string model)
+        string model,
+        CancellationToken cancellationToken,
+        bool lowLatency)
     {
         for (var attempt = 1; attempt <= 2; attempt++)
         {
             try
             {
                 return await GenerateOnceAsync(
-                    prompt, apiKey, model);
+                    prompt,
+                    apiKey,
+                    model,
+                    cancellationToken,
+                    lowLatency);
             }
             catch (HttpRequestException ex)
                 when (attempt == 1 && IsTemporaryFailure(ex))
             {
-                await Task.Delay(TimeSpan.FromSeconds(1));
+                await Task.Delay(
+                    TimeSpan.FromSeconds(1),
+                    cancellationToken);
             }
         }
 
@@ -77,8 +200,27 @@ public class OllamaService : IOllamaService
     private async Task<string> GenerateOnceAsync(
         string prompt,
         string apiKey,
-        string model)
+        string model,
+        CancellationToken cancellationToken,
+        bool lowLatency)
     {
+        var generationConfig = new Dictionary<string, object>
+        {
+            ["temperature"] = 0.2,
+            ["maxOutputTokens"] = 500
+        };
+
+        if (lowLatency &&
+            model.StartsWith(
+                "gemini-2.5-flash",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            generationConfig["thinkingConfig"] = new
+            {
+                thinkingBudget = 0
+            };
+        }
+
         var requestBody = new
         {
             contents = new[]
@@ -91,11 +233,7 @@ public class OllamaService : IOllamaService
                     }
                 }
             },
-            generationConfig = new
-            {
-                temperature = 0.2,
-                maxOutputTokens = 500
-            }
+            generationConfig
         };
 
         using var request = new HttpRequestMessage(
@@ -105,11 +243,14 @@ public class OllamaService : IOllamaService
         request.Headers.Add("x-goog-api-key", apiKey);
         request.Content = JsonContent.Create(requestBody);
 
-        using var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(
+            request,
+            cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync();
+            var error = await response.Content.ReadAsStringAsync(
+                cancellationToken);
 
             throw new HttpRequestException(
                 $"Gemini API returned {(int)response.StatusCode} " +
@@ -119,7 +260,8 @@ public class OllamaService : IOllamaService
         }
 
         var result =
-            await response.Content.ReadFromJsonAsync<GeminiResponse>();
+            await response.Content.ReadFromJsonAsync<GeminiResponse>(
+                cancellationToken: cancellationToken);
 
         var text = result?.Candidates?
             .FirstOrDefault()?
@@ -166,5 +308,10 @@ public class OllamaService : IOllamaService
     private sealed class GeminiPart
     {
         public string? Text { get; set; }
+    }
+
+    private sealed class OllamaResponse
+    {
+        public string? Response { get; set; }
     }
 }

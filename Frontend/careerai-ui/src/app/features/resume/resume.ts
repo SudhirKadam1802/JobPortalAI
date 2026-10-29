@@ -652,10 +652,10 @@ export class Resume implements OnInit {
             error
           );
 
-
-          this.analysisError =
-            error?.error?.message ??
-            'Resume analysis failed. Please try again.';
+          this.analysisError = error?.name === 'TimeoutError'
+            ? 'Resume analysis is taking longer than expected. Please try again.'
+            : error?.error?.message ??
+              'Resume analysis failed. Please try again.';
 
 
           this.analysisMessage = '';

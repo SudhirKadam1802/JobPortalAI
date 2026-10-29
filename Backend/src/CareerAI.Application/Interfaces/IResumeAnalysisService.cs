@@ -6,7 +6,8 @@ public interface IResumeAnalysisService
 {
     Task<ResumeAnalysisResponse> AnalyzeAsync(
         Guid userId,
-        Guid resumeId);
+        Guid resumeId,
+        CancellationToken cancellationToken = default);
 
     Task<ResumeAnalysisResponse?> GetAnalysisAsync(
         Guid userId,

@@ -99,12 +99,14 @@ public class ResumeController : ControllerBase
     // ==========================================
 
     [HttpPost("{id:guid}/analyze")]
-    public async Task<IActionResult> Analyze(Guid id)
+    public async Task<IActionResult> Analyze(
+        Guid id,
+        CancellationToken cancellationToken)
     {
         var userId = GetUserId();
 
         var analysis = await _resumeAnalysisService
-            .AnalyzeAsync(userId, id);
+            .AnalyzeAsync(userId, id, cancellationToken);
 
         return Ok(analysis);
     }

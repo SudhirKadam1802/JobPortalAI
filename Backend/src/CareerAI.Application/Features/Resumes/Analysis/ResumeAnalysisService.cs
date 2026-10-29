@@ -28,7 +28,8 @@ public class ResumeAnalysisService : IResumeAnalysisService
 
     public async Task<ResumeAnalysisResponse> AnalyzeAsync(
         Guid userId,
-        Guid resumeId)
+        Guid resumeId,
+        CancellationToken cancellationToken = default)
     {
         // 1. Find candidate
         var candidate = await _candidateRepository
@@ -71,7 +72,7 @@ public class ResumeAnalysisService : IResumeAnalysisService
 
         // 6. Send resume to Ollama
         var aiResponse = await _ollamaService
-            .GenerateAsync(prompt);
+            .GenerateQuickAsync(prompt, cancellationToken);
 
         // 7. Parse AI response
         var analysisData = ParseAIResponse(aiResponse);

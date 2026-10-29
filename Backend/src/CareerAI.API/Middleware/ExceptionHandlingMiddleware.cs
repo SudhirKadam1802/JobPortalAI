@@ -32,6 +32,28 @@ public class ExceptionHandlingMiddleware
                 StatusCodes.Status401Unauthorized,
                 exception.Message);
         }
+        catch (TimeoutException exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "An AI request timed out.");
+
+            await WriteResponseAsync(
+                context,
+                StatusCodes.Status504GatewayTimeout,
+                "AI is taking longer than expected. Please try again.");
+        }
+        catch (HttpRequestException exception)
+        {
+            _logger.LogError(
+                exception,
+                "A configured external service is unavailable.");
+
+            await WriteResponseAsync(
+                context,
+                StatusCodes.Status503ServiceUnavailable,
+                "The AI service is unavailable. Check that the configured provider is running and try again.");
+        }
         catch (Exception exception)
         {
             _logger.LogError(

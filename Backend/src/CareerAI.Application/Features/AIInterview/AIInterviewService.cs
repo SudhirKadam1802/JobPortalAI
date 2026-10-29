@@ -22,7 +22,8 @@ public class AIInterviewService : IAIInterviewService
 
     public async Task<StartInterviewResponse> StartInterviewAsync(
         Guid userId,
-        StartInterviewRequest request)
+        StartInterviewRequest request,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(request.JobTitle))
         {
@@ -63,7 +64,9 @@ public class AIInterviewService : IAIInterviewService
             request.NumberOfQuestions);
 
         var aiResponse =
-            await _ollamaService.GenerateAsync(prompt);
+            await _ollamaService.GenerateQuickAsync(
+                prompt,
+                cancellationToken);
 
         var questions =
             ParseQuestions(aiResponse);
@@ -112,7 +115,8 @@ public class AIInterviewService : IAIInterviewService
     public async Task<SubmitAnswerResponse> SubmitAnswerAsync(
         Guid userId,
         Guid interviewId,
-        SubmitAnswerRequest request)
+        SubmitAnswerRequest request,
+        CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(request.Answer))
         {
@@ -151,7 +155,9 @@ public class AIInterviewService : IAIInterviewService
 
         var aiResponse =
             await _ollamaService
-                .GenerateAsync(evaluationPrompt);
+                .GenerateQuickAsync(
+                    evaluationPrompt,
+                    cancellationToken);
 
         var evaluation =
             ParseEvaluation(aiResponse);
