@@ -44,6 +44,9 @@ public class ResumeService : IResumeService
                 "Candidate profile was not found.");
         }
 
+        var previousResumes = await _resumeRepository
+            .GetByCandidateIdAsync(candidate.Id);
+
         // 3. Save physical file
         var filePath = await _fileStorageService
             .SaveFileAsync(file);
@@ -72,6 +75,24 @@ public class ResumeService : IResumeService
                 .DeleteFileAsync(filePath);
 
             throw;
+        }
+
+        foreach (var previousResume in previousResumes)
+        {
+            try
+            {
+                await _fileStorageService
+                    .DeleteFileAsync(previousResume.FilePath);
+            }
+            catch (IOException exception)
+            {
+                throw new IOException(
+                    "The new resume was uploaded, but an older resume file could not be deleted. Try uploading again to finish replacing it.",
+                    exception);
+            }
+
+            _resumeRepository.Remove(previousResume);
+            await _resumeRepository.SaveChangesAsync();
         }
 
         return new ResumeResponse

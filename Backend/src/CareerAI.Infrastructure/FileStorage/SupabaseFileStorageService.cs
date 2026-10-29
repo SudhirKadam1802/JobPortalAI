@@ -138,10 +138,8 @@ public class SupabaseFileStorageService : IFileStorageService
         }
         catch (AmazonS3Exception ex)
         {
-            throw new Exception(
-                $"Supabase S3 delete failed. " +
-                $"Status: {ex.StatusCode}. " +
-                $"Details: {ex.Message}",
+            throw new IOException(
+                $"Supabase S3 delete failed with status {ex.StatusCode}.",
                 ex);
         }
     }

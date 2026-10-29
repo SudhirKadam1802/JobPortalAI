@@ -13,5 +13,8 @@ public interface IResumeRepository
     Task AddAsync(
         Resume resume);
 
+    void Remove(
+        Resume resume);
+
     Task SaveChangesAsync();
 }

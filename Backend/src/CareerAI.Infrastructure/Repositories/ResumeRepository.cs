@@ -38,6 +38,12 @@ public class ResumeRepository : IResumeRepository
         await _context.Resumes.AddAsync(resume);
     }
 
+    public void Remove(
+        Resume resume)
+    {
+        _context.Resumes.Remove(resume);
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

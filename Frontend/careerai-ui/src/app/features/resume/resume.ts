@@ -324,6 +324,7 @@ export class Resume implements OnInit {
             error?.error?.message ??
             'Resume upload failed. Please try again.';
 
+          this.loadResumes();
 
           this.changeDetectorRef.detectChanges();
 

@@ -54,6 +54,17 @@ public class ExceptionHandlingMiddleware
                 StatusCodes.Status503ServiceUnavailable,
                 "The AI service is unavailable. Check that the configured provider is running and try again.");
         }
+        catch (IOException exception)
+        {
+            _logger.LogError(
+                exception,
+                "A stored file could not be replaced.");
+
+            await WriteResponseAsync(
+                context,
+                StatusCodes.Status502BadGateway,
+                exception.Message);
+        }
         catch (Exception exception)
         {
             _logger.LogError(
