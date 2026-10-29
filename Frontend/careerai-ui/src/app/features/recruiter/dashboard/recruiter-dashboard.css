@@ -699,7 +699,7 @@
   background: #f8fafc;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .dashboard-page {
     margin-left: 0;
     padding: 24px 20px 48px;
