@@ -100,6 +100,10 @@ export class Resume implements OnInit {
 
   analysis: ResumeAnalysisResult | null = null;
 
+  private resumeLoadRequestId = 0;
+
+  private analysisLoadRequestId = 0;
+
 
   // =========================================================
   // CONSTRUCTOR
@@ -293,12 +297,15 @@ export class Resume implements OnInit {
           this.uploadMessage =
             'Resume uploaded successfully.';
 
-
           this.selectedFile = null;
 
-
-          this.loadResumes();
-
+          this.resumeLoadRequestId++;
+          this.analysisLoadRequestId++;
+          this.resumes = [resume];
+          this.selectedResume = resume;
+          this.analysis = null;
+          this.analysisMessage = '';
+          this.analysisError = '';
 
           this.changeDetectorRef.detectChanges();
 
@@ -333,6 +340,8 @@ export class Resume implements OnInit {
 
   loadResumes(): void {
 
+    const requestId = ++this.resumeLoadRequestId;
+
     this.resumeService
 
       .getMyResumes()
@@ -340,6 +349,10 @@ export class Resume implements OnInit {
       .subscribe({
 
         next: (resumes) => {
+
+          if (requestId !== this.resumeLoadRequestId) {
+            return;
+          }
 
           console.log(
             'Resumes received from backend:',
@@ -379,6 +392,7 @@ export class Resume implements OnInit {
 
             this.selectedResume =
               null;
+            this.analysis = null;
 
           }
 
@@ -389,6 +403,10 @@ export class Resume implements OnInit {
 
 
         error: (error) => {
+
+          if (requestId !== this.resumeLoadRequestId) {
+            return;
+          }
 
           console.error(
             'Unable to load resumes:',
@@ -449,11 +467,20 @@ export class Resume implements OnInit {
     resumeId: string
   ): void {
 
+    const requestId = ++this.analysisLoadRequestId;
+
     this.resumeService
       .getResumeAnalysis(resumeId)
       .subscribe({
 
         next: (result: any) => {
+
+          if (
+            requestId !== this.analysisLoadRequestId ||
+            this.selectedResume?.id !== resumeId
+          ) {
+            return;
+          }
 
           this.setAnalysisResult(
             result,
@@ -470,6 +497,13 @@ export class Resume implements OnInit {
         },
 
         error: (error) => {
+
+          if (
+            requestId !== this.analysisLoadRequestId ||
+            this.selectedResume?.id !== resumeId
+          ) {
+            return;
+          }
 
           // A 404 means this resume has not been analyzed yet.
           if (error?.status === 404) {
