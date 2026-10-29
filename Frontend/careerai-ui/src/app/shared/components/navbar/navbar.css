@@ -5,23 +5,25 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e1e8f0;
   box-sizing: border-box;
+  box-shadow: 0 4px 18px rgba(17, 40, 68, 0.035);
 }
 
 .navbar-left h1 {
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #1f2937;
+  color: #102a4c;
+  letter-spacing: -0.035em;
 }
 
 .navbar-left span {
   display: block;
   margin-top: 4px;
   font-size: 13px;
-  color: #6b7280;
+  color: #74849a;
 }
 
 .navbar-right {
@@ -40,19 +42,21 @@
   position: relative;
   width: 40px;
   height: 40px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e1e8f0;
   border-radius: 50%;
-  background: #ffffff;
+  background: #f8fafc;
   cursor: pointer;
   font-size: 17px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .notification-button:hover {
-  background: #f3f4f6;
+  border-color: #f1c39f;
+  background: #fff7f0;
+  transform: translateY(-1px);
 }
 
 /* Unread Count Badge */
@@ -175,7 +179,7 @@
   flex-shrink: 0;
   margin-top: 6px;
   border-radius: 50%;
-  background: #f97316;
+  background: linear-gradient(145deg, #ff984b, #ed6f18);
 }
 
 /* Loading and Empty States */
@@ -221,13 +225,13 @@
 
 .user-info strong {
   font-size: 14px;
-  color: #1f2937;
+  color: #102a4c;
 }
 
 .user-info span {
   margin-top: 3px;
   font-size: 12px;
-  color: #6b7280;
+  color: #74849a;
 }
 
 /* Responsive Design */

@@ -8,11 +8,12 @@
   display: flex;
   flex-direction: column;
 
-  background: #1f2937;
+  background: linear-gradient(180deg, #102744 0%, #0c2039 100%);
   color: #ffffff;
 
   box-sizing: border-box;
   z-index: 1000;
+  box-shadow: 8px 0 28px rgba(11, 28, 52, 0.1);
 }
 
 .sidebar-brand {
@@ -22,7 +23,7 @@
   display: flex;
   align-items: center;
 
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .brand-logo {
@@ -33,13 +34,14 @@
   align-items: center;
   justify-content: center;
 
-  border-radius: 10px;
+  border-radius: 12px;
 
-  background: #f97316;
+  background: linear-gradient(145deg, #ff984b, #ed6f18);
   color: #ffffff;
 
   font-size: 21px;
   font-weight: 700;
+  box-shadow: 0 7px 16px rgba(237, 111, 24, 0.28);
 }
 
 .brand-text {
@@ -53,7 +55,7 @@
 
 .brand-text span {
   font-size: 11px;
-  color: #9ca3af;
+  color: #a7b6c8;
 }
 
 .sidebar-nav {
@@ -70,24 +72,28 @@
 
   border-radius: 8px;
 
-  color: #d1d5db;
+  color: #c6d3e2;
   text-decoration: none;
 
   font-size: 14px;
 
   transition:
     background 0.2s,
-    color 0.2s;
+    color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .nav-item:hover {
-  background: #374151;
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
+  transform: translateX(2px);
 }
 
 .nav-item.active {
-  background: #f97316;
+  background: linear-gradient(100deg, #f58b3b, #e96d19);
   color: #ffffff;
+  box-shadow: 0 7px 16px rgba(233, 109, 25, 0.2);
 }
 
 .nav-icon {
@@ -97,7 +103,7 @@
 
 .sidebar-bottom {
   padding: 16px 12px;
-  border-top: 1px solid #374151;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .logout-button {
@@ -112,7 +118,7 @@
   border-radius: 8px;
 
   background: transparent;
-  color: #d1d5db;
+  color: #c6d3e2;
 
   font-size: 14px;
   text-align: left;
@@ -121,7 +127,7 @@
 }
 
 .logout-button:hover {
-  background: #374151;
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
@@ -151,7 +157,12 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
     border-top: 1px solid #374151;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .nav-item {
