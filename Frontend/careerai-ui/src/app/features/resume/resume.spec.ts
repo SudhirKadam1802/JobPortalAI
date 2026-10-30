@@ -181,4 +181,35 @@ describe('Resume', () => {
     expect(component.analysis?.resumeId).toBe(uploadedResume.id);
     expect(component.analysis?.score).toBe(73);
   });
+
+  it('keeps the previous analysis visible when a retry fails', () => {
+    const state = TestBed.inject(ResumeStateService);
+    state.selectedResume = {
+      id: 'resume-a',
+      candidateId: 'candidate',
+      fileName: 'resume-a.pdf',
+      filePath: 'resumes/resume-a.pdf',
+      fileType: '.pdf',
+      uploadedAt: '2026-10-29T10:00:00Z',
+    };
+    state.analysis = {
+      id: 'analysis-a',
+      resumeId: 'resume-a',
+      score: 85,
+      summary: 'Existing analysis',
+      skills: ['Angular'],
+      education: 'Degree',
+      experience: 'Experience',
+      suggestions: ['Add metrics'],
+    };
+
+    component.analyzeResume();
+    analysisResponse.error({
+      status: 504,
+      error: { message: 'AI request timed out.' },
+    });
+
+    expect(component.analysis?.score).toBe(85);
+    expect(component.analysisError).toBe('AI request timed out.');
+  });
 });

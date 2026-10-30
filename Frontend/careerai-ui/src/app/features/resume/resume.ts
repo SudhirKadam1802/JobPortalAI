@@ -524,8 +524,6 @@ export class Resume {
 
     this.analysisError = '';
 
-    this.analysis = null;
-
 
     console.log(
       'Starting AI resume analysis:',

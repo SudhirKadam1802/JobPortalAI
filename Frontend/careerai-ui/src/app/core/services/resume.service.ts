@@ -47,7 +47,7 @@ export class ResumeService {
     return this.http.post<any>(
       `${this.apiUrl}/${id}/analyze`,
       {}
-    ).pipe(timeout({ first: 150_000 }));
+    ).pipe(timeout({ first: 180_000 }));
   }
 
   getResumeAnalysis(id: string): Observable<any> {
