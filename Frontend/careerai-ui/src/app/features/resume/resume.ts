@@ -1,8 +1,11 @@
 import {
+  DestroyRef,
+  ElementRef,
   ChangeDetectorRef,
   Component,
-  OnInit
+  ViewChild
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   DatePipe
@@ -15,35 +18,16 @@ import {
 import {
   ResumeService
 } from '../../core/services/resume.service';
+import {
+  ResumeAnalysisResult,
+  ResumeStateService
+} from '../../core/services/resume-state.service';
 
 import {
   Resume as ResumeModel
 } from '../../core/models/resume.models';
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { Navbar } from '../../shared/components/navbar/navbar';
-
-
-interface ResumeAnalysisResult {
-
-  id: string;
-
-  resumeId: string;
-
-  score: number;
-
-  summary: string;
-
-  skills: string[];
-
-  education: string;
-
-  experience: string;
-
-  suggestions: string[];
-
-  analyzedAt?: string;
-
-}
 
 
 @Component({
@@ -63,44 +47,18 @@ interface ResumeAnalysisResult {
 })
 
 
-export class Resume implements OnInit {
+export class Resume {
 
+  @ViewChild('resumeFileInput')
+  private resumeFileInput?: ElementRef<HTMLInputElement>;
 
   // =========================================================
   // RESUME DATA
   // =========================================================
 
-  resumes: ResumeModel[] = [];
-
-  selectedFile: File | null = null;
-
-  selectedResume: ResumeModel | null = null;
-
-
-  // =========================================================
-  // UPLOAD STATE
-  // =========================================================
-
   isUploading = false;
 
-  uploadMessage = '';
-
-  errorMessage = '';
-
-
-  // =========================================================
-  // AI ANALYSIS STATE
-  // =========================================================
-
   isAnalyzing = false;
-
-  analysisMessage = '';
-
-  analysisError = '';
-
-  analysis: ResumeAnalysisResult | null = null;
-
-  private resumeLoadRequestId = 0;
 
   private analysisLoadRequestId = 0;
 
@@ -111,19 +69,85 @@ export class Resume implements OnInit {
 
   constructor(
     private resumeService: ResumeService,
+    private resumeState: ResumeStateService,
+    private changeDetectorRef: ChangeDetectorRef,
+    destroyRef: DestroyRef
+  ) {
+    this.resumeState.reset$
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(() => {
+        if (this.resumeFileInput) {
+          this.resumeFileInput.nativeElement.value = '';
+        }
 
-    private changeDetectorRef: ChangeDetectorRef
-  ) {}
+        this.isUploading = false;
+        this.isAnalyzing = false;
+        this.analysisLoadRequestId++;
+      });
+  }
 
+  get resumes(): ResumeModel[] {
+    return this.resumeState.resumes;
+  }
 
-  // =========================================================
-  // INITIAL LOAD
-  // =========================================================
+  set resumes(value: ResumeModel[]) {
+    this.resumeState.resumes = value;
+  }
 
-  ngOnInit(): void {
+  get selectedFile(): File | null {
+    return this.resumeState.selectedFile;
+  }
 
-    this.loadResumes();
+  set selectedFile(value: File | null) {
+    this.resumeState.selectedFile = value;
+  }
 
+  get selectedResume(): ResumeModel | null {
+    return this.resumeState.selectedResume;
+  }
+
+  set selectedResume(value: ResumeModel | null) {
+    this.resumeState.selectedResume = value;
+  }
+
+  get uploadMessage(): string {
+    return this.resumeState.uploadMessage;
+  }
+
+  set uploadMessage(value: string) {
+    this.resumeState.uploadMessage = value;
+  }
+
+  get errorMessage(): string {
+    return this.resumeState.errorMessage;
+  }
+
+  set errorMessage(value: string) {
+    this.resumeState.errorMessage = value;
+  }
+
+  get analysisMessage(): string {
+    return this.resumeState.analysisMessage;
+  }
+
+  set analysisMessage(value: string) {
+    this.resumeState.analysisMessage = value;
+  }
+
+  get analysisError(): string {
+    return this.resumeState.analysisError;
+  }
+
+  set analysisError(value: string) {
+    this.resumeState.analysisError = value;
+  }
+
+  get analysis(): ResumeAnalysisResult | null {
+    return this.resumeState.analysis;
+  }
+
+  set analysis(value: ResumeAnalysisResult | null) {
+    this.resumeState.analysis = value;
   }
 
 
@@ -243,6 +267,7 @@ export class Resume implements OnInit {
 
     const fileToUpload =
       this.selectedFile;
+    const sessionVersion = this.resumeState.sessionVersion;
 
 
     this.isUploading = true;
@@ -288,6 +313,10 @@ export class Resume implements OnInit {
 
         next: (resume) => {
 
+          if (sessionVersion !== this.resumeState.sessionVersion) {
+            return;
+          }
+
           console.log(
             'Resume uploaded successfully:',
             resume
@@ -299,7 +328,6 @@ export class Resume implements OnInit {
 
           this.selectedFile = null;
 
-          this.resumeLoadRequestId++;
           this.analysisLoadRequestId++;
           this.resumes = [resume];
           this.selectedResume = resume;
@@ -314,6 +342,10 @@ export class Resume implements OnInit {
 
         error: (error) => {
 
+          if (sessionVersion !== this.resumeState.sessionVersion) {
+            return;
+          }
+
           console.error(
             'Resume upload failed:',
             error
@@ -323,101 +355,6 @@ export class Resume implements OnInit {
           this.errorMessage =
             error?.error?.message ??
             'Resume upload failed. Please try again.';
-
-          this.loadResumes();
-
-          this.changeDetectorRef.detectChanges();
-
-        }
-
-      });
-
-  }
-
-
-  // =========================================================
-  // LOAD RESUMES
-  // =========================================================
-
-  loadResumes(): void {
-
-    const requestId = ++this.resumeLoadRequestId;
-
-    this.resumeService
-
-      .getMyResumes()
-
-      .subscribe({
-
-        next: (resumes) => {
-
-          if (requestId !== this.resumeLoadRequestId) {
-            return;
-          }
-
-          console.log(
-            'Resumes received from backend:',
-            resumes
-          );
-
-
-          const sortedResumes =
-            [...resumes].sort(
-              (a, b) =>
-                new Date(b.uploadedAt).getTime() -
-                new Date(a.uploadedAt).getTime()
-            );
-
-
-          // Show only latest resume
-
-          this.resumes =
-            sortedResumes.slice(0, 1);
-
-
-          // Automatically select latest resume
-
-          if (
-            this.resumes.length > 0
-          ) {
-
-            this.selectedResume =
-              this.resumes[0];
-
-            this.loadSavedAnalysis(
-              this.selectedResume.id
-            );
-
-          }
-          else {
-
-            this.selectedResume =
-              null;
-            this.analysis = null;
-
-          }
-
-
-          this.changeDetectorRef.detectChanges();
-
-        },
-
-
-        error: (error) => {
-
-          if (requestId !== this.resumeLoadRequestId) {
-            return;
-          }
-
-          console.error(
-            'Unable to load resumes:',
-            error
-          );
-
-
-          this.errorMessage =
-            'Unable to load your resume.';
-
 
           this.changeDetectorRef.detectChanges();
 
@@ -469,6 +406,7 @@ export class Resume implements OnInit {
   ): void {
 
     const requestId = ++this.analysisLoadRequestId;
+    const sessionVersion = this.resumeState.sessionVersion;
 
     this.resumeService
       .getResumeAnalysis(resumeId)
@@ -478,6 +416,7 @@ export class Resume implements OnInit {
 
           if (
             requestId !== this.analysisLoadRequestId ||
+            sessionVersion !== this.resumeState.sessionVersion ||
             this.selectedResume?.id !== resumeId
           ) {
             return;
@@ -501,6 +440,7 @@ export class Resume implements OnInit {
 
           if (
             requestId !== this.analysisLoadRequestId ||
+            sessionVersion !== this.resumeState.sessionVersion ||
             this.selectedResume?.id !== resumeId
           ) {
             return;
@@ -571,6 +511,7 @@ export class Resume implements OnInit {
 
     const resumeId =
       this.selectedResume.id;
+    const sessionVersion = this.resumeState.sessionVersion;
 
 
     // =======================================================
@@ -632,6 +573,10 @@ export class Resume implements OnInit {
 
         next: (result: any) => {
 
+          if (sessionVersion !== this.resumeState.sessionVersion) {
+            return;
+          }
+
           console.log(
             'Resume analysis completed:',
             result
@@ -681,6 +626,10 @@ export class Resume implements OnInit {
         // ===================================================
 
         error: (error) => {
+
+          if (sessionVersion !== this.resumeState.sessionVersion) {
+            return;
+          }
 
           console.error(
             'Resume analysis failed:',

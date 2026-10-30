@@ -8,6 +8,7 @@ import {
   LoginRequest,
   RegisterRequest
 } from '../models/auth.models';
+import { ResumeStateService } from './resume-state.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,8 @@ export class AuthService {
     `${environment.apiUrl}/Auth`;
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private resumeState: ResumeStateService
   ) {}
 
   login(
@@ -47,6 +49,8 @@ export class AuthService {
               'Login response does not contain a token.'
             );
           }
+
+          this.resumeState.reset();
 
           localStorage.setItem(
             'careerai_token',
@@ -87,6 +91,8 @@ export class AuthService {
               'Registration response does not contain a token.'
             );
           }
+
+          this.resumeState.reset();
 
           localStorage.setItem(
             'careerai_token',
@@ -160,6 +166,8 @@ export class AuthService {
   }
 
   logout(): void {
+
+    this.resumeState.reset();
 
     localStorage.removeItem(
       'careerai_token'

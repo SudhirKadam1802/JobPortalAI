@@ -1,34 +1,43 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { Resume as ResumeModel } from '../../core/models/resume.models';
+import { AuthService } from '../../core/services/auth.service';
 import { ResumeService } from '../../core/services/resume.service';
+import { ResumeStateService } from '../../core/services/resume-state.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { Resume } from './resume';
 
 describe('Resume', () => {
   let component: Resume;
   let fixture: ComponentFixture<Resume>;
-  let resumesResponse: Subject<ResumeModel[]>;
   let uploadResponse: Subject<ResumeModel>;
+  let analysisResponse: Subject<unknown>;
   let resumeService: {
     uploadResume: ReturnType<typeof vi.fn>;
-    getMyResumes: ReturnType<typeof vi.fn>;
     getResumeAnalysis: ReturnType<typeof vi.fn>;
+    analyzeResume: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
-    resumesResponse = new Subject<ResumeModel[]>();
+    sessionStorage.clear();
     uploadResponse = new Subject<ResumeModel>();
+    analysisResponse = new Subject<unknown>();
     resumeService = {
       uploadResume: vi.fn(() => uploadResponse),
-      getMyResumes: vi.fn(() => resumesResponse),
-      getResumeAnalysis: vi.fn(() => new Subject()),
+      getResumeAnalysis: vi.fn(() => analysisResponse),
+      analyzeResume: vi.fn(() => analysisResponse),
     };
 
     await TestBed.configureTestingModule({
       imports: [Resume],
       providers: [
-        { provide: ResumeService, useValue: resumeService }
+        { provide: ResumeService, useValue: resumeService },
+        { provide: AuthService, useValue: { getUserRole: () => null } },
+        {
+          provide: NotificationService,
+          useValue: { getMyNotifications: () => of([]) }
+        }
       ],
     }).compileComponents();
 
@@ -36,67 +45,140 @@ describe('Resume', () => {
     component = fixture.componentInstance;
   });
 
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('keeps the uploaded resume selected when an older resume list request finishes later', () => {
-    fixture.detectChanges();
-
-    const previousResume: ResumeModel = {
-      id: 'previous-resume',
-      candidateId: 'candidate',
-      fileName: 'previous.pdf',
-      filePath: 'resumes/previous.pdf',
-      fileType: '.pdf',
-      uploadedAt: '2026-10-28T10:00:00Z',
-    };
+  it('preserves the uploaded resume and analysis across route recreation and refresh', () => {
     const uploadedResume: ResumeModel = {
-      ...previousResume,
-      id: 'new-resume',
-      fileName: 'new.pdf',
-      filePath: 'resumes/new.pdf',
+      id: 'resume-a',
+      candidateId: 'candidate',
+      fileName: 'resume-a.pdf',
+      filePath: 'resumes/resume-a.pdf',
+      fileType: '.pdf',
       uploadedAt: '2026-10-29T10:00:00Z',
     };
 
-    component.selectedFile = new File(['resume'], 'new.pdf', {
+    component.selectedFile = new File(['resume A'], 'resume-a.pdf', {
       type: 'application/pdf',
     });
     component.uploadResume();
     uploadResponse.next(uploadedResume);
 
-    resumesResponse.next([previousResume]);
+    component.analyzeResume();
+    analysisResponse.next({
+      id: 'analysis-a',
+      resumeId: uploadedResume.id,
+      score: 85,
+      summary: 'Resume A analysis',
+      skills: ['Angular'],
+      education: 'Degree',
+      experience: 'Experience',
+      suggestions: ['Add metrics'],
+    });
+
+    fixture.destroy();
+    fixture = TestBed.createComponent(Resume);
+    component = fixture.componentInstance;
 
     expect(component.selectedResume).toEqual(uploadedResume);
     expect(component.resumes).toEqual([uploadedResume]);
-    expect(resumeService.getMyResumes).toHaveBeenCalledTimes(1);
+    expect(component.analysis?.score).toBe(85);
+    expect(component.analysisMessage).toBe('Resume analyzed successfully.');
+
+    const refreshedState = new ResumeStateService();
+    expect(refreshedState.selectedResume).toEqual(uploadedResume);
+    expect(refreshedState.analysis?.score).toBe(85);
+    expect(refreshedState.selectedFile).toBeNull();
   });
 
-  it('selects the most recently uploaded resume when reopening the page', () => {
+  it('keeps a selected local PDF when the route component is recreated', () => {
+    const selectedFile = new File(['resume'], 'selected.pdf', {
+      type: 'application/pdf',
+    });
+    component.selectedFile = selectedFile;
+
+    fixture.destroy();
+    fixture = TestBed.createComponent(Resume);
+    component = fixture.componentInstance;
+
+    expect(component.selectedFile).toBe(selectedFile);
+  });
+
+  it('clears the native file input when resume state is reset', () => {
     fixture.detectChanges();
 
-    const olderResume: ResumeModel = {
-      id: 'older-resume',
+    const input = fixture.nativeElement.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    let inputValue = 'C:\\fakepath\\resume-a.pdf';
+    Object.defineProperty(input, 'value', {
+      configurable: true,
+      get: () => inputValue,
+      set: (value: string) => {
+        inputValue = value;
+      },
+    });
+
+    TestBed.inject(ResumeStateService).reset();
+
+    expect(input.value).toBe('');
+  });
+
+  it('analyzes a newly uploaded resume without reusing the previous analysis', () => {
+    const state = TestBed.inject(ResumeStateService);
+    state.selectedResume = {
+      id: 'resume-a',
       candidateId: 'candidate',
-      fileName: 'older.pdf',
-      filePath: 'resumes/older.pdf',
+      fileName: 'resume-a.pdf',
+      filePath: 'resumes/resume-a.pdf',
       fileType: '.pdf',
-      uploadedAt: '2026-10-28T10:00:00Z',
-    };
-    const latestResume: ResumeModel = {
-      ...olderResume,
-      id: 'latest-resume',
-      fileName: 'latest.pdf',
-      filePath: 'resumes/latest.pdf',
       uploadedAt: '2026-10-29T10:00:00Z',
     };
+    state.analysis = {
+      id: 'analysis-a',
+      resumeId: 'resume-a',
+      score: 85,
+      summary: 'Resume A analysis',
+      skills: [],
+      education: '',
+      experience: '',
+      suggestions: [],
+    };
+    state.reset();
 
-    resumesResponse.next([olderResume, latestResume]);
+    const uploadedResume: ResumeModel = {
+      id: 'resume-b',
+      candidateId: 'candidate',
+      fileName: 'resume-b.pdf',
+      filePath: 'resumes/resume-b.pdf',
+      fileType: '.pdf',
+      uploadedAt: '2026-10-30T10:00:00Z',
+    };
+    component.selectedFile = new File(['resume B'], 'resume-b.pdf', {
+      type: 'application/pdf',
+    });
+    component.uploadResume();
+    uploadResponse.next(uploadedResume);
 
-    expect(component.selectedResume).toEqual(latestResume);
-    expect(component.resumes).toEqual([latestResume]);
-    expect(resumeService.getResumeAnalysis).toHaveBeenCalledWith(
-      latestResume.id
-    );
+    component.analyzeResume();
+    analysisResponse.next({
+      id: 'analysis-b',
+      resumeId: uploadedResume.id,
+      score: 73,
+      summary: 'Resume B analysis',
+      skills: ['TypeScript'],
+      education: '',
+      experience: '',
+      suggestions: [],
+    });
+
+    expect(component.selectedResume).toEqual(uploadedResume);
+    expect(component.analysis?.resumeId).toBe(uploadedResume.id);
+    expect(component.analysis?.score).toBe(73);
   });
 });
