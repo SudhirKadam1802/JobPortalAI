@@ -10,7 +10,7 @@ namespace CareerAI.Infrastructure.AI;
 public class OllamaService : IOllamaService
 {
     private static readonly TimeSpan QuickGenerationTimeout =
-        TimeSpan.FromSeconds(45);
+        TimeSpan.FromSeconds(90);
     private static readonly TimeSpan LocalGenerationTimeout =
         TimeSpan.FromMinutes(2);
 
